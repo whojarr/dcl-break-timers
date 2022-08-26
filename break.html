@@ -2,7 +2,40 @@
 <html lang="en">
 
 <head>
+
+
     <style>
+        body {
+            font-family: "Open Sans",sans-serif;
+        }
+        #main_remaining {
+            font-size: 15em;
+            width:100%;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+        #main_timezones {
+            font-size: 2em;
+            width:100%;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+        #show_settings {
+            height: 50;
+        }
+        #timer_settings {
+            padding: 20px;
+            position:absolute;
+            top: 100px;
+            left: 100px;
+            border: 1px;
+            border-style: solid;
+            border-color: black;
+            background-color: rgb(235, 199, 255);
+            box-shadow: 2px 2px;
+        }
         .timezone_time {
             display: inline-block;
             width: 80px;
@@ -14,16 +47,32 @@
             width: 120px;
             padding-left: 10px;
         }
+        .timezone_time_main {
+            display: inline-block;
+            width: 170px;
+            padding-left: 10px;
+            text-align: right;
+        }
+        .timezone_name_main {
+            display: inline-block;
+            width: 120px;
+            padding-left: 10px;
+        }
     </style>
+
 </head>
 
 <body>
 
-    <h1>Timer</h1>
+    <div id="show_settings"  onclick="document.getElementById('timer_settings').style.display='inline-block';">
+        ...
+    </div>
 
-    <div id="current_time"></div>
+    <div id="timer_settings">
 
-    <div>
+        <h1>Timer</h1>
+
+        <div id="current_time"></div>
 
         <br/>
         <br/>
@@ -58,7 +107,19 @@
         <br/>
         <button onclick="background_update()">Update</button>
 
+
+        <br/>
+        <br/>
+
+
+        <button onclick="document.getElementById('timer_settings').style.display='none';">Hide</button>
+
     </div>
+
+
+    <div id="main_remaining" class="main_remaining"></div>
+
+    <div id="main_timezones"></div>
 
     <script>
 
@@ -73,6 +134,7 @@
                 this.remaining_element_id = '';
                 this.localtimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                 this.timezones_element_id = '';
+                this.timezones_main_element_id = '';
 
                 this.timezones = [
                     {
@@ -103,6 +165,7 @@
                 var url = document.getElementById('background_url').value;
                 document.body.style.backgroundImage = 'url(' + url + ')';
                 document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundRepeat = 'no-repeat';
             }
 
             convert_utc_date_to_local_date(date) {
@@ -128,9 +191,6 @@
                 var timezone_enabled_element = document.getElementById('timezone_enabled_' + index);
                 if (timezone_enabled_element) {
                     var enabled = timezone_enabled_element.checked;
-                    if (enabled) {
-                        // show time for this on main display
-                    }
                     var timezone_value = timezone_enabled_element.value;
 
                     var zonetime_from = this.timezone_convert(remaining_time['start'], timezone_value);
@@ -161,6 +221,15 @@
 
                     document.getElementById('timezone_time_from_' + index).innerHTML = zonetime_from_display;
                     document.getElementById('timezone_time_to_' + index).innerHTML = zonetime_to_display;
+
+                    if (enabled) {
+                        document.getElementById('timezone_main_' + index).style.display='block';
+                        document.getElementById('timezone_time_main_from_' + index).innerHTML = zonetime_from_display;
+                        document.getElementById('timezone_time_main_to_' + index).innerHTML = zonetime_to_display;
+                    }
+                    else {
+                        document.getElementById('timezone_main_' + index).style.display='none';
+                    }
                 }
             }
 
@@ -170,17 +239,13 @@
                     var remaining_time = this.startstop_to_remaining();
                     var time_display = remaining_time['hr'] + ':' + remaining_time['min'] + ':' + remaining_time['sec'];
                     document.getElementById(this.remaining_element_id).innerHTML = time_display;
+                    document.getElementById('main_remaining').innerHTML = time_display;
                     var timezones = this.timezones;
                     for (let index = 0; index < timezones.length; ++index) {
                         this.remaining_timezone_update(timezones[index], index);
                     };
                     setTimeout(() => this.remaining_autoupdate(), 1000);
                 }
-            }
-
-
-            remaining_displays_update(time_display) {
-                
             }
 
 
@@ -313,6 +378,36 @@
                 });
             }
 
+
+            timezone_list_main_display() {
+
+                var timezone_main_element_id = this.timezones_main_element_id
+                var timezones = this.timezones;
+
+                timezones.forEach(function (item, index) {
+
+                    var label = document.createElement('span');
+                    label.className = 'timezone_main_name';
+                    label.innerHTML = item['label'];
+
+                    var timedisplay_from = document.createElement('span');
+                    timedisplay_from.className = 'timezone_time_main';
+                    timedisplay_from.id = 'timezone_time_main_from_' + index;
+
+                    var timedisplay_to = document.createElement('span');
+                    timedisplay_to.className = 'timezone_time_main';
+                    timedisplay_to.id = 'timezone_time_main_to_' + index;
+
+                    var div = document.createElement('div');
+                    div.id = 'timezone_main_' + index;
+                    div.appendChild(label);
+                    div.appendChild(timedisplay_from);
+                    div.appendChild(timedisplay_to);
+
+                    document.getElementById(timezone_main_element_id).appendChild(div);
+
+                });
+            }
         }
 
 
@@ -328,6 +423,9 @@
 
         timer.timezones_element_id = 'timezones';
         timer.timezone_list_display();
+
+        timer.timezones_main_element_id = 'main_timezones';
+        timer.timezone_list_main_display();
 
         timer.background_update();
 
