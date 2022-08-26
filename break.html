@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        .timezone_time {
+            display: inline-block;
+            width: 80px;
+            padding-left: 10px;
+            text-align: right;
+        }
+        .timezone_name {
+            display: inline-block;
+            width: 120px;
+            padding-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Timer</h1>
+
+    <div id="current_time"></div>
+
+    <div>
+
+        <br/>
+        <br/>
+
+        <label>Starts</label>
+        <input type="time" value="12:00" onchange="remaining_update()" id="start">
+        <label>Ends</label>
+        <input type="time" value="12:00" onchange="remaining_update()" id="stop">
+        <span id="local_timezone"></span>
+
+        <br/>
+        <br/>
+
+        <label>Remaining</label>
+        <span id="remaining"></span>
+
+        <br/>
+
+        <progress value="0" max="10" id="progressBar"></progress>
+        <br/>
+        <br/>
+
+        <label>Display Timezones</label>
+        <div id="timezones"></div>
+
+        <br/>
+        <br/>
+
+        <label>Background URL</label>
+        <br/>
+        <input type="test" id="background_url" size="80" onchange="background_update()" value="https://pixabay.com/get/g43c317d86af1a70089ee7940a351c00f82c60a4c284438a4fa8a2008f81965abca03bd21e31df64dd90948c7a74dc350e3f27da509a2128f9e4dab0f63987d1b_640.jpg"/>
+        <br/>
+        <button onclick="background_update()">Update</button>
+
+    </div>
+
+    <script>
+
+        class DCTimer {
+            constructor() {
+                this.timer_enabled = false;
+                this.clock_date = new Date();
+                this.clock_element_id = '';
+                this.timer_remaining = 0;
+                this.timer_start_element_id = '';
+                this.timer_end_element_id = '';
+                this.remaining_element_id = '';
+                this.localtimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                this.timezones_element_id = '';
+
+                this.timezones = [
+                    {
+                        "timezone": "Pacific/Auckland",
+                        "label": "Auckland"
+                    },
+                    {
+                        "timezone": "Australia/Sydney",
+                        "label": "Sydney"
+                    },
+                    {
+                        "timezone": "Australia/Perth",
+                        "label": "Perth"
+                    },
+                    {
+                        "timezone": "America/Los_Angeles",
+                        "label": "Los Angeles"
+                    },
+                    {
+                        "timezone": "America/Chicago",
+                        "label": "Chicago"
+                    }
+                ];
+
+            }
+
+            background_update() {
+                var url = document.getElementById('background_url').value;
+                document.body.style.backgroundImage = 'url(' + url + ')';
+                document.body.style.backgroundSize = 'cover';
+            }
+
+            convert_utc_date_to_local_date(date) {
+                var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+                var offset = date.getTimezoneOffset() / 60;
+                var hours = date.getHours();
+                newDate.setHours(hours - offset);
+
+                return newDate;
+            }
+
+
+            current_time_autoupdate() {
+                if (this.clock_element_id !== '') {
+                    document.getElementById(this.clock_element_id).innerHTML = this.time_now();
+                    setTimeout(() => this.current_time_autoupdate(), 1000);
+                }
+            }
+
+
+            remaining_timezone_update(item, index) {
+                var remaining_time = this.startstop_to_remaining();
+                var timezone_enabled_element = document.getElementById('timezone_enabled_' + index);
+                if (timezone_enabled_element) {
+                    var enabled = timezone_enabled_element.checked;
+                    if (enabled) {
+                        // show time for this on main display
+                    }
+                    var timezone_value = timezone_enabled_element.value;
+
+                    var zonetime_from = this.timezone_convert(remaining_time['start'], timezone_value);
+                    var zonetime_from_hrs = zonetime_from.getHours();
+                    var zonetime_from_ampm = "am";
+                    if (zonetime_from_hrs > 12) {
+                        zonetime_from_ampm = "pm";
+                        zonetime_from_hrs = zonetime_from_hrs - 12;
+                    }
+                    var zonetime_from_mins = zonetime_from.getMinutes();
+                    if (zonetime_from_mins < 10) {
+                        zonetime_from_mins = '0' + zonetime_from_mins;
+                    }
+                    var zonetime_from_display = zonetime_from_hrs + ":" + zonetime_from_mins + " " + zonetime_from_ampm;
+
+                    var zonetime_to = this.timezone_convert(remaining_time['stop'], timezone_value);
+                    var zonetime_to_hrs = zonetime_to.getHours();
+                    var zonetime_to_ampm = "am";
+                    if (zonetime_to_hrs > 12) {
+                        zonetime_to_ampm = "pm";
+                        zonetime_to_hrs = zonetime_to_hrs - 12;
+                    }
+                    var zonetime_to_mins = zonetime_to.getMinutes();
+                    if (zonetime_to_mins < 10) {
+                        zonetime_to_mins = '0' + zonetime_to_mins;
+                    }
+                    var zonetime_to_display = zonetime_to_hrs + ":" + zonetime_to_mins + " " + zonetime_to_ampm;;
+
+                    document.getElementById('timezone_time_from_' + index).innerHTML = zonetime_from_display;
+                    document.getElementById('timezone_time_to_' + index).innerHTML = zonetime_to_display;
+                }
+            }
+
+
+            remaining_autoupdate(element_id) {
+                if (this.remaining_element_id !== '') {
+                    var remaining_time = this.startstop_to_remaining();
+                    var time_display = remaining_time['hr'] + ':' + remaining_time['min'] + ':' + remaining_time['sec'];
+                    document.getElementById(this.remaining_element_id).innerHTML = time_display;
+                    var timezones = this.timezones;
+                    for (let index = 0; index < timezones.length; ++index) {
+                        this.remaining_timezone_update(timezones[index], index);
+                    };
+                    setTimeout(() => this.remaining_autoupdate(), 1000);
+                }
+            }
+
+
+            remaining_displays_update(time_display) {
+                
+            }
+
+
+            startstop_to_dates() {
+                var start_date_local = new Date();
+                var end_date_local = new Date();
+
+                if (this.timer_start_element_id !== '') {
+                    var start_date_form = document.getElementById(this.timer_start_element_id).valueAsDate;
+                    var start_date_form_local = this.convert_utc_date_to_local_date(start_date_form);
+                    var start_date_form_local_hour = start_date_form_local.getHours();
+                    var start_date_form_local_min = start_date_form_local.getMinutes();
+
+                    start_date_local.setHours(start_date_form_local_hour);
+                    start_date_local.setMinutes(start_date_form_local_min);
+                    start_date_local.setSeconds(0);
+                }
+
+                if (this.timer_end_element_id !== '') {
+                    var end_date_form = document.getElementById(this.timer_end_element_id).valueAsDate;
+                    var end_date_form_local = this.convert_utc_date_to_local_date(end_date_form);
+                    var end_date_form_local_hour = end_date_form_local.getHours();
+                    var end_date_form_local_min = end_date_form_local.getMinutes();
+
+                    end_date_local.setHours(end_date_form_local_hour);
+                    end_date_local.setMinutes(end_date_form_local_min);
+                    end_date_local.setSeconds(0);
+                }
+
+                if ( end_date_local < start_date_local ) {
+                    end_date_local.setDate(end_date_local.getDate() + 1);
+                }
+
+                return [start_date_local, end_date_local];
+            }
+
+
+            startstop_to_remaining() {
+                var now_date = new Date();
+                var start_date = this.startstop_to_dates()[0];
+                var stop_date = this.startstop_to_dates()[1];
+                if (now_date > start_date && now_date < stop_date) {
+                    start_date = now_date;
+                }
+
+                const diffMs = Math.abs(stop_date - start_date);
+                const diffSec = Math.floor(Math.abs(stop_date - start_date) / 1000);
+                const diffMin = Math.ceil(diffSec/60);
+                const diffHrs = Math.floor(diffMin /60 );
+                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+                var remaining_days = diffDays;
+                var remaining_hrs = diffHrs - (diffDays * 24);
+                var remaining_mins = diffMin - (diffHrs * 60);
+                var remaining_secs = 60 + diffSec - (diffMin * 60);
+                var remaining_ms = diffMs - (diffSec * 1000);
+                if (remaining_secs == 60) {
+                    remaining_secs = 0;
+                }
+                if (remaining_secs > 0) {
+                    remaining_mins = remaining_mins - 1;
+                }
+                if (now_date > stop_date) {
+                    remaining_ms = 0;
+                    remaining_secs = 0;
+                    remaining_mins = 0;
+                    remaining_hrs = 0;
+                    remaining_days = 0;
+                }
+
+                var result = {
+                    "start": start_date,
+                    "stop": stop_date,
+                    "ms": remaining_ms,
+                    "sec": remaining_secs,
+                    "min": remaining_mins,
+                    "hr": remaining_hrs,
+                    "day": remaining_days
+                }
+
+                return result;
+            }
+
+
+            time_now() {
+                var now_date = new Date();
+                var now_time = now_date.toLocaleTimeString();
+
+                return now_time;
+            }
+
+
+            timezone_convert(date, timezone) {
+                return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: timezone}));   
+            }
+
+
+            timezone_list_display() {
+
+                var timezone_element_id = this.timezones_element_id
+                var timezones = this.timezones;
+
+                timezones.forEach(function (item, index) {
+
+                    var label = document.createElement('span');
+                    label.className = 'timezone_name';
+                    label.innerHTML = item['label'];
+
+                    var checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = 'timezone_enabled_' + index;
+                    checkbox.value = item['timezone'];
+
+                    var timedisplay_from = document.createElement('span');
+                    timedisplay_from.className = 'timezone_time';
+                    timedisplay_from.id = 'timezone_time_from_' + index;
+
+                    var timedisplay_to = document.createElement('span');
+                    timedisplay_to.className = 'timezone_time';
+                    timedisplay_to.id = 'timezone_time_to_' + index;
+
+                    var div = document.createElement('div');
+                    div.appendChild(checkbox);
+                    div.appendChild(label);
+                    div.appendChild(timedisplay_from);
+                    div.appendChild(timedisplay_to);
+
+                    document.getElementById(timezone_element_id).appendChild(div);
+
+                });
+            }
+
+        }
+
+
+        var timer = new DCTimer();
+        timer.clock_element_id = 'current_time';
+        timer.current_time_autoupdate();
+
+        timer.timer_start_element_id = 'start';
+        timer.timer_end_element_id = 'stop';
+
+        timer.remaining_element_id = 'remaining';
+        timer.remaining_autoupdate();
+
+        timer.timezones_element_id = 'timezones';
+        timer.timezone_list_display();
+
+        timer.background_update();
+
+        background_update = () => timer.background_update();
+        remaining_update = () => timer.remaining_autoupdate();
+
+</script>
+
+</body>
+
+</html>

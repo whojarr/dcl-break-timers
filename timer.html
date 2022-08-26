@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+</head>
+
+<body>
+
+
+    <h1>Timer</h1>
+
+    <div>
+
+        <progress value="0" max="10" id="progressBar"></progress>
+        <br/>
+        <label>Minutes</label>
+        <input type="text" value="0" size="2" id="minutes">
+        <label>Seconds</label>
+        <input type="text" value="0" size="2" id="seconds">
+        <br/>
+        <label>Remaining</label>
+        <pre id="remaining"></pre> 
+        <br/>
+        <input type="submit" value="Start" onclick="timer_start();"/>
+
+    </div>
+
+    <script>
+
+        function seconds_to_time(seconds) {
+            var mins = Math.floor(seconds / 60);
+            var secs = seconds - ( mins * 60 );
+            if ( secs < 10 ) {
+                secs = '0' + secs;
+            }
+            result = mins + ":" + secs;
+
+            return result
+        }
+
+        function timer_reset() {
+            
+        }
+
+        function timer_start() {
+            var set_minutes = document.getElementById('minutes').value;
+            var set_seconds = document.getElementById('seconds').value;
+            var seconds = parseInt(set_seconds) + ( parseInt(set_minutes) * 60);
+            document.getElementById('remaining').innerHTML = seconds_to_time(seconds);
+            document.getElementById('progressBar').max = seconds;
+            var timeleft = seconds;
+            var downloadTimer = setInterval(function(){
+                if(timeleft <= 0){
+                    clearInterval(downloadTimer);
+                }
+                document.getElementById("progressBar").value = seconds - timeleft;
+                document.getElementById('remaining').innerHTML = seconds_to_time(timeleft);
+                timeleft -= 1;
+            }, 1000);
+        }
+
+    </script>
+</body>
+
+</html>
