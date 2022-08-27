@@ -9,14 +9,14 @@
             font-family: "Open Sans",sans-serif;
         }
         #main_remaining {
-            font-size: 15em;
+            font-size: 10em;
             width:100%;
             margin-left: auto;
             margin-right: auto;
             text-align: center;
         }
         #main_timezones {
-            font-size: 2em;
+            font-size: 3em;
             width:100%;
             margin-left: auto;
             margin-right: auto;
@@ -36,27 +36,33 @@
             background-color: rgb(235, 199, 255);
             box-shadow: 2px 2px;
         }
+        .timezone_name {
+            display: inline-block;
+            width: 120px;
+            padding-left: 10px;
+        }
         .timezone_time {
             display: inline-block;
             width: 80px;
             padding-left: 10px;
             text-align: right;
         }
-        .timezone_name {
-            display: inline-block;
-            width: 120px;
-            padding-left: 10px;
-        }
-        .timezone_time_main {
-            display: inline-block;
-            width: 170px;
-            padding-left: 10px;
+        .timezone_name_main {
+            padding-right: 50px;
             text-align: right;
         }
-        .timezone_name_main {
-            display: inline-block;
-            width: 120px;
-            padding-left: 10px;
+        .timezone_time_from_main {
+            text-align: right;
+        }
+        .timezone_time_to_main {
+            text-align: left;
+        }
+        #timezone_main_table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #timezone_main_table td {
+            padding-left: 5px;
         }
     </style>
 
@@ -119,7 +125,16 @@
 
     <div id="main_remaining" class="main_remaining"></div>
 
-    <div id="main_timezones"></div>
+    <div id="main_timezones">
+        <table id="timezone_main_table">
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
 
     <script>
 
@@ -223,8 +238,9 @@
                     document.getElementById('timezone_time_to_' + index).innerHTML = zonetime_to_display;
 
                     if (enabled) {
-                        document.getElementById('timezone_main_' + index).style.display='block';
+                        document.getElementById('timezone_main_' + index).style.display='';
                         document.getElementById('timezone_time_main_from_' + index).innerHTML = zonetime_from_display;
+                        document.getElementById('timezone_time_main_seperator_' + index).innerHTML = " - ";
                         document.getElementById('timezone_time_main_to_' + index).innerHTML = zonetime_to_display;
                     }
                     else {
@@ -237,7 +253,20 @@
             remaining_autoupdate(element_id) {
                 if (this.remaining_element_id !== '') {
                     var remaining_time = this.startstop_to_remaining();
-                    var time_display = remaining_time['hr'] + ':' + remaining_time['min'] + ':' + remaining_time['sec'];
+                    var remaining_time_hr = remaining_time['hr'];
+                    if ( remaining_time_hr < 10) {
+                        remaining_time_hr = "0" + remaining_time_hr;
+                    }
+                    var remaining_time_min = remaining_time['min'];
+                    if ( remaining_time_min < 10) {
+                        remaining_time_min = "0" + remaining_time_min;
+                    }
+                    var remaining_time_sec = remaining_time['sec'];
+                    if ( remaining_time_sec < 10) {
+                        remaining_time_sec = "0" + remaining_time_sec;
+                    }
+
+                    var time_display = remaining_time_hr + ':' + remaining_time_min + ':' + remaining_time_sec;
                     document.getElementById(this.remaining_element_id).innerHTML = time_display;
                     document.getElementById('main_remaining').innerHTML = time_display;
                     var timezones = this.timezones;
@@ -386,25 +415,30 @@
 
                 timezones.forEach(function (item, index) {
 
-                    var label = document.createElement('span');
-                    label.className = 'timezone_main_name';
+                    var label = document.createElement('td');
+                    label.className = 'timezone_name_main';
                     label.innerHTML = item['label'];
 
-                    var timedisplay_from = document.createElement('span');
-                    timedisplay_from.className = 'timezone_time_main';
+                    var timedisplay_from = document.createElement('td');
+                    timedisplay_from.className = 'timezone_time_from_main';
                     timedisplay_from.id = 'timezone_time_main_from_' + index;
 
-                    var timedisplay_to = document.createElement('span');
-                    timedisplay_to.className = 'timezone_time_main';
+                    var timedisplay_seperator = document.createElement('td');
+                    timedisplay_seperator.className = 'timezone_time_main_seperator';
+                    timedisplay_seperator.id = 'timezone_time_main_seperator_' + index;
+
+                    var timedisplay_to = document.createElement('td');
+                    timedisplay_to.className = 'timezone_time_to_main';
                     timedisplay_to.id = 'timezone_time_main_to_' + index;
 
-                    var div = document.createElement('div');
-                    div.id = 'timezone_main_' + index;
-                    div.appendChild(label);
-                    div.appendChild(timedisplay_from);
-                    div.appendChild(timedisplay_to);
+                    var tr = document.createElement('tr');
+                    tr.id = 'timezone_main_' + index;
+                    tr.appendChild(label);
+                    tr.appendChild(timedisplay_from);
+                    tr.appendChild(timedisplay_seperator);
+                    tr.appendChild(timedisplay_to);
 
-                    document.getElementById(timezone_main_element_id).appendChild(div);
+                    document.getElementById('timezone_main_table').appendChild(tr);
 
                 });
             }
