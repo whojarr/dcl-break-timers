@@ -8,9 +8,13 @@
         body {
             font-family: "Open Sans",sans-serif;
         }
+        #main_content {
+            height: 95vh;
+        }
         #main_remaining {
             font-size: 10em;
             width:100%;
+            margin-top: 10vh;
             margin-left: auto;
             margin-right: auto;
             text-align: center;
@@ -20,7 +24,11 @@
             width:100%;
             margin-left: auto;
             margin-right: auto;
+            margin-bottom: 10%;
             text-align: center;
+        }
+        #main_timer_text_color {
+            color: black;
         }
         #show_settings {
             height: 50;
@@ -28,8 +36,8 @@
         #timer_settings {
             padding: 20px;
             position:absolute;
-            top: 100px;
-            left: 100px;
+            top: 5%;
+            left: 5%;
             border: 1px;
             border-style: solid;
             border-color: black;
@@ -64,15 +72,14 @@
         #timezone_main_table td {
             padding-left: 5px;
         }
+        #timezones_text_color {
+            color: black;
+        }
     </style>
 
 </head>
 
 <body>
-
-    <div id="show_settings"  onclick="document.getElementById('timer_settings').style.display='inline-block';">
-        ...
-    </div>
 
     <div id="timer_settings">
 
@@ -107,9 +114,22 @@
         <br/>
         <br/>
 
+
+        <label>Colours</label>
+        <div id="colours">
+            <label>Timer</label>
+            <input type="color" id="main_timer_text_color" value="#000000" onchange="main_timer_text_color();" onclick="main_timer_text_color();"/>
+            <br/>
+            <label>Timezones</label>
+            <input type="color" id="timezones_text_color" onchange="timezones_text_color()" onclick="timezones_text_color()"/>
+        </div>
+
+        <br/>
+        <br/>
+
         <label>Background URL</label>
         <br/>
-        <input type="test" id="background_url" size="80" onchange="background_update()" value="https://pixabay.com/get/g43c317d86af1a70089ee7940a351c00f82c60a4c284438a4fa8a2008f81965abca03bd21e31df64dd90948c7a74dc350e3f27da509a2128f9e4dab0f63987d1b_640.jpg"/>
+        <input type="test" id="background_url" size="80" onchange="background_update()" value="https://img.freepik.com/free-vector/watercolor-abstract-purple-background_23-2149120778.jpg"/>
         <br/>
         <button onclick="background_update()">Update</button>
 
@@ -122,20 +142,26 @@
 
     </div>
 
+    <div id="main_content">
 
-    <div id="main_remaining" class="main_remaining"></div>
+        <div id="show_settings"  onclick="document.getElementById('timer_settings').style.display='inline-block';">
+            ...
+        </div>
 
-    <div id="main_timezones">
-        <table id="timezone_main_table">
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-        </table>
+        <div id="main_remaining" class="main_remaining"></div>
+
+        <div id="main_timezones">
+            <table id="timezone_main_table">
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+
     </div>
-
     <script>
 
         class DCTimer {
@@ -198,6 +224,12 @@
                     document.getElementById(this.clock_element_id).innerHTML = this.time_now();
                     setTimeout(() => this.current_time_autoupdate(), 1000);
                 }
+            }
+
+
+            main_timer_text_color() {
+                var color = document.getElementById('main_timer_text_color').value;
+                document.getElementById('main_remaining').style.color = color;
             }
 
 
@@ -442,6 +474,14 @@
 
                 });
             }
+
+
+            timezones_text_color() {
+                var color = document.getElementById('timezones_text_color').value;
+                document.getElementById('main_timezones').style.color = color;
+            }
+
+
         }
 
 
@@ -464,7 +504,9 @@
         timer.background_update();
 
         background_update = () => timer.background_update();
+        main_timer_text_color = () => timer.main_timer_text_color();
         remaining_update = () => timer.remaining_autoupdate();
+        timezones_text_color = () => timer.timezones_text_color();
 
 </script>
 
