@@ -485,7 +485,6 @@
 
         }
 
-
         var timer = new DCTimer();
         timer.clock_element_id = 'current_time';
         timer.current_time_autoupdate();
@@ -508,6 +507,20 @@
         main_timer_text_color = () => timer.main_timer_text_color();
         remaining_update = () => timer.remaining_autoupdate();
         timezones_text_color = () => timer.timezones_text_color();
+
+
+        document.onkeydown = function(evt) {
+            evt = evt || window.event;
+            var isEscape = false;
+            if ("key" in evt) {
+                isEscape = (evt.key === "Escape" || evt.key === "Esc");
+            } else {
+                isEscape = (evt.keyCode === 27);
+            }
+            if (isEscape) {
+                document.getElementById('timer_settings').style.display='none';
+            }
+        };
 
 </script>
 
