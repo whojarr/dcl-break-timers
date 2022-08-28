@@ -241,7 +241,7 @@
                     var enabled = timezone_enabled_element.checked;
                     var timezone_value = timezone_enabled_element.value;
 
-                    var zonetime_from = this.timezone_convert(remaining_time['start'], timezone_value);
+                    var zonetime_from = this.timezone_convert(remaining_time['start_original'], timezone_value);
                     var zonetime_from_hrs = zonetime_from.getHours();
                     var zonetime_from_ampm = "am";
                     if (zonetime_from_hrs > 12) {
@@ -348,6 +348,7 @@
             startstop_to_remaining() {
                 var now_date = new Date();
                 var start_date = this.startstop_to_dates()[0];
+                var start_date_original = this.startstop_to_dates()[0];
                 var stop_date = this.startstop_to_dates()[1];
                 if (now_date > start_date && now_date < stop_date) {
                     start_date = now_date;
@@ -379,6 +380,7 @@
                 }
 
                 var result = {
+                    "start_original": start_date_original,
                     "start": start_date,
                     "stop": stop_date,
                     "ms": remaining_ms,
