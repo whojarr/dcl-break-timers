@@ -207,6 +207,10 @@
                         "label": "Chicago"
                     },
                     {
+                        "timezone": "America/New_York",
+                        "label": "New York"
+                    },
+                    {
                         "timezone": "Europe/London",
                         "label": "London"
                     }
@@ -412,6 +416,11 @@
                 return now_time;
             }
 
+
+            timezone_brisbane_required() {
+                // compare the time in sydney to brisbane and return true if they dont match
+                return true
+            }
 
             timezone_convert(date, timezone) {
                 return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: timezone}));   
