@@ -5,7 +5,7 @@
 
 </head>
 
-<body>
+<body id="body">
 
     <style>
         body {
@@ -144,8 +144,10 @@
 
     <div id="main_content">
 
-        <div id="show_settings"  onclick="document.getElementById('timer_settings').style.display='inline-block';">
-            ...
+        <div id="show_settings">
+            <span onclick="document.getElementById('timer_settings').style.display='inline-block';">...</span>
+            <span id="fullscreen_open" onclick="fullscreen_open();">&uarr;</span>
+            <span id="fullscreen_close" onclick="fullscreen_close();" style="display: none;">&darr;</span>
         </div>
 
         <div id="main_remaining" class="main_remaining"></div>
@@ -240,6 +242,35 @@
                     document.getElementById(this.clock_element_id).innerHTML = this.time_now();
                     setTimeout(() => this.current_time_autoupdate(), 1000);
                 }
+            }
+
+
+            fullscreen_open() {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) { /* Safari */
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) { /* IE11 */
+                    elem.msRequestFullscreen();
+                }
+                document.getElementById('fullscreen_close').style.display = 'inline-block';
+                document.getElementById('fullscreen_open').style.display = 'none';
+            }
+
+
+            fullscreen_close() {
+                if (document.fullscreen) {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) { /* Safari */
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) { /* IE11 */
+                        document.msExitFullscreen();
+                    }
+                }
+                document.getElementById('fullscreen_close').style.display = 'none';
+                document.getElementById('fullscreen_open').style.display = 'inline-block';
             }
 
 
@@ -529,7 +560,8 @@
         main_timer_text_color = () => timer.main_timer_text_color();
         remaining_update = () => timer.remaining_autoupdate();
         timezones_text_color = () => timer.timezones_text_color();
-
+        fullscreen_open = () => timer.fullscreen_open();
+        fullscreen_close = () => timer.fullscreen_close();
 
         document.onkeydown = function(evt) {
             evt = evt || window.event;
