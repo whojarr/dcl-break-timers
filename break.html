@@ -334,21 +334,20 @@
 
             config_url_apply() {
                 var config_arr = this.config_url_parser();
-                console.log(config_arr);
                 if ( 'start' in config_arr ) {
                     // Start Date
                     var new_date_start = new Date(config_arr['start']);
-                    console.log(new_date_start);
                     var new_date_start_local = this.convert_utc_date_to_local_date(new_date_start);
-                    console.log(new_date_start_local);
                     // var new_date_start_local2 = this.timezone_convert(new_date_start, 'America/New_York');
                     // console.log(new_date_start_local2);
-                    console.log(this.localtimezone);
 
                     // End Date
                     document.getElementById(this.timer_start_element_id).value = new_date_start.toISOString().substring(11,16);
                     var new_date_end = new Date(config_arr['end']);
                     document.getElementById(this.timer_end_element_id).value = new_date_end.toISOString().substring(11,16);
+
+                    // Timezones
+                    this.timezone_list_update(config_arr['timezones'])
 
                     // Font Colors
                     document.getElementById('main_timer_text_color').value = config_arr['font_color'];
@@ -703,6 +702,7 @@
 
                     var label = document.createElement('td');
                     label.className = 'timezone_name_main';
+                    label.id = 'timezone_name_main_' + index;
                     label.innerHTML = item['label'];
 
                     var timedisplay_from = document.createElement('td');
@@ -727,6 +727,18 @@
                     document.getElementById('timezone_main_table').appendChild(tr);
 
                 });
+            }
+
+
+            timezone_list_update(timezones_enabled_array) {
+                var timezones = this.timezones;
+                timezones.forEach(function (item, index) {
+                    var label = item['label'];
+                    var timezone = item['timezone'];
+                    if (timezones_enabled_array.includes(timezone)) {
+                        document.getElementById('timezone_enabled_' + index).checked=true;
+                    }
+                })
             }
 
 
