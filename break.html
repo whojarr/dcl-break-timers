@@ -10,8 +10,19 @@
     <style>
         body {
             font-family: "Open Sans",sans-serif;
+            padding: 0%;
+            margin: 0%;
+        }
+        #background_video {
+            z-index:-1;
+            min-width: 100%;
+            height: 100vh;
+            object-fit: fill;
         }
         #main_content {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
             height: 95vh;
         }
         #main_remaining {
@@ -37,6 +48,7 @@
             height: 50;
         }
         #timer_settings {
+            z-index:99;
             opacity: 0.8;
             padding: 20px;
             position:absolute;
@@ -125,6 +137,11 @@
         </div>
 
         <br/>
+
+        <label>Share URL</label>
+        <a id="config_url" href="" onmouseover="config_url_update();" style="display:none;">Share</a>
+        <button onclick="config_to_clipboard();">Copy to clipboard</button>
+
         <br/>
 
         <label>Background URL</label>
@@ -133,7 +150,6 @@
         <br/>
         <button onclick="background_update()">Update</button>
 
-
         <br/>
         <br/>
 
@@ -141,6 +157,11 @@
         <button onclick="document.getElementById('timer_settings').style.display='none';">Hide</button>
 
     </div>
+
+
+    <video autoplay muted loop id="background_video" style="display:none;">
+        <source id="background_video_content" src="https://cdn.videvo.net/videvo_files/video/free/2013-07/large_watermarked/hd0186_preview.mp4" type="video/mp4" crossorigin="anonymous">
+    </video>
 
     <div id="main_content">
 
@@ -220,12 +241,173 @@
 
             }
 
-            background_update() {
+
+            background_image_disable() {
+                var url = document.getElementById('background_url').value;
+                document.body.style.backgroundImage = '';
+            }
+
+
+            background_image_update() {
                 var url = document.getElementById('background_url').value;
                 document.body.style.backgroundImage = 'url(' + url + ')';
                 document.body.style.backgroundSize = 'cover';
                 document.body.style.backgroundRepeat = 'no-repeat';
+                this.background_video_disable();
             }
+
+
+            background_update() {
+                var url = document.getElementById('background_url').value;
+                var file_suffix = url.split('.').pop();
+                if (file_suffix == 'mp4') {
+                    this.background_video_update();
+                }
+                else {
+                    this.background_image_update();
+                }
+                // this.config_url_update();
+            }
+
+
+            background_video_disable() {
+                var vid = document.getElementById('background_video');
+                vid.style.display = 'None';
+            }
+
+
+            background_video_enable() {
+                var vid = document.getElementById('background_video');
+                vid.style.display = '';
+            }
+
+
+            background_video_update() {
+                var url = document.getElementById('background_url').value;
+                var vid = document.getElementById('background_video').src = url;
+                this.background_video_enable();
+            }
+
+            config_json() {
+                var config_array = this.config_screen_get_array();
+                var result = {};
+                result['start'] = config_array['start'].toJSON();
+                result['end'] = config_array['end'].toJSON();
+                result['timezone'] = config_array['timezone_local'];
+                result['font_color'] = config_array['font_color'];
+                result['timezones_color'] = config_array['timezones_color'];
+                result['background_url'] = config_array['background_url'];
+                result['timezones'] = config_array['timezones'];
+
+                return JSON.stringify(result);
+            }
+
+
+            config_to_clipboard() {
+                this.config_url_update();
+
+                var text = document.getElementById('config_url').href;
+                if (window.clipboardData && window.clipboardData.setData) {
+                    // Internet Explorer-specific code path to prevent textarea being shown while dialog is visible.
+                    return window.clipboardData.setData("Text", text);
+
+                }
+                else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+                    var textarea = document.createElement("textarea");
+                    textarea.textContent = text;
+                    textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in Microsoft Edge.
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+                    }
+                    catch (ex) {
+                        console.warn("Copy to clipboard failed.", ex);
+                        return prompt("Copy to clipboard: Ctrl+C, Enter", text);
+                    }
+                    finally {
+                        document.body.removeChild(textarea);
+                    }
+                }
+            }
+
+
+            config_url_apply() {
+                var config_arr = this.config_url_parser();
+                console.log(config_arr);
+                if ( 'start' in config_arr ) {
+                    // Start Date
+                    var new_date_start = new Date(config_arr['start']);
+                    console.log(new_date_start);
+                    var new_date_start_local = this.convert_utc_date_to_local_date(new_date_start);
+                    console.log(new_date_start_local);
+                    // var new_date_start_local2 = this.timezone_convert(new_date_start, 'America/New_York');
+                    // console.log(new_date_start_local2);
+                    console.log(this.localtimezone);
+
+                    // End Date
+                    document.getElementById(this.timer_start_element_id).value = new_date_start.toISOString().substring(11,16);
+                    var new_date_end = new Date(config_arr['end']);
+                    document.getElementById(this.timer_end_element_id).value = new_date_end.toISOString().substring(11,16);
+
+                    // Font Colors
+                    document.getElementById('main_timer_text_color').value = config_arr['font_color'];
+                    this.main_timer_text_color();
+                    document.getElementById('timezones_text_color').value = config_arr['timezones_color'];
+                    this.timezones_text_color();
+                    
+                    // Background URL
+                    document.getElementById('background_url').value = config_arr['background_url'];
+                    console.log("loading background as " + config_arr['background_url']);
+                    this.background_update();
+                } else {
+                    console.log("no config found in the url");
+                }
+
+            }
+
+            config_url_parser() {
+                var config_arr = [];
+                const urlSearchParams = new URLSearchParams(window.location.search);
+                const params = Object.fromEntries(urlSearchParams.entries());
+                if ( 'config' in params ) {
+                    var config = decodeURI(params['config']);
+                    config_arr = JSON.parse(config);
+                }
+                return config_arr;
+            }
+
+
+            config_url_update() {
+                var url_json = this.config_json();
+                var url_encoded  = encodeURIComponent(url_json);
+                var curr_loc = document.location;
+                if (curr_loc.protocol == 'file:') {
+                    var new_url = 'file://' + curr_loc.pathname + "?config=" + url_encoded;
+                    document.getElementById('config_url').href = new_url;
+                }
+                else {
+                    var new_url = document.location.origin + document.location.pathname + "?config=" + url_encoded;
+                    document.getElementById('config_url').href = new_url;
+                    // /window.history.pushState({"config": url_encoded}, "Updated", new_url);
+                }
+            }
+
+
+            config_screen_get_array() {
+                var config_array = {}
+                var times = this.startstop_to_remaining();
+                config_array['start'] = document.getElementById(this.timer_start_element_id).valueAsDate;
+                config_array['end'] = document.getElementById(this.timer_end_element_id).valueAsDate;
+                config_array['timezone_local'] = this.localtimezone;
+                config_array['font_color'] = document.getElementById('main_timer_text_color').value;
+                config_array['timezones_color'] = document.getElementById('timezones_text_color').value;
+                config_array['background_url'] = document.getElementById('background_url').value;
+                config_array['timezones'] = this.timezone_list_active();
+
+                return config_array
+            }
+
 
             convert_utc_date_to_local_date(date) {
                 var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
@@ -458,9 +640,27 @@
             }
 
 
+            timezone_list_active() {
+
+                const timezone_element_id = this.timezones_element_id;
+                var timezones = this.timezones;
+                var result = [];
+
+                timezones.forEach(function (item, index) {
+                    const elem = document.getElementById('timezone_enabled_' + index);
+                    if (elem.checked) {
+                        result.push(elem.value);
+                    }
+
+                });
+                return result;
+
+            }
+
+
             timezone_list_display() {
 
-                var timezone_element_id = this.timezones_element_id
+                var timezone_element_id = this.timezones_element_id;
                 var timezones = this.timezones;
 
                 timezones.forEach(function (item, index) {
@@ -554,7 +754,13 @@
         timer.timezones_main_element_id = 'main_timezones';
         timer.timezone_list_main_display();
 
-        timer.background_update();
+        timer.background_update(); // always reload the background on reload
+    
+        timer.config_url_parser(); // tmp
+
+        timer.config_url_apply(); // always apply the url config on reload
+
+        timer.background_update(); // tmp
 
         background_update = () => timer.background_update();
         main_timer_text_color = () => timer.main_timer_text_color();
@@ -562,6 +768,9 @@
         timezones_text_color = () => timer.timezones_text_color();
         fullscreen_open = () => timer.fullscreen_open();
         fullscreen_close = () => timer.fullscreen_close();
+        config_url_update = () => timer.config_url_update();
+        config_to_clipboard = () => timer.config_to_clipboard();
+
 
         document.onkeydown = function(evt) {
             evt = evt || window.event;
