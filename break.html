@@ -337,9 +337,8 @@
                 if ( 'start' in config_arr ) {
                     // Start Date
                     var new_date_start = new Date(config_arr['start']);
-                    var new_date_start_local = this.convert_utc_date_to_local_date(new_date_start);
-                    // var new_date_start_local2 = this.timezone_convert(new_date_start, 'America/New_York');
-                    // console.log(new_date_start_local2);
+                    //var new_date_start_local = this.convert_utc_date_to_local_date(new_date_start);/
+                    var new_date_start_local = this.timezone_convert(new_date_start, this.localtimezone);
 
                     // End Date
                     document.getElementById(this.timer_start_element_id).value = new_date_start.toISOString().substring(11,16);
