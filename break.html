@@ -401,9 +401,11 @@
                     this.timezones_text_color();
                     
                     // Logo URL
-                    document.getElementById('logo_url').value = config_arr['logo_url'];
-                    console.log("loading logo as " + config_arr['logo_url']);
-                    this.logo_update();
+                    if (config_arr['logo_url'] != 'undefined') {
+                        document.getElementById('logo_url').value = config_arr['logo_url'];
+                        console.log("loading logo as " + config_arr['logo_url']);
+                        this.logo_update();
+                    }
                     
                     // Background URL
                     document.getElementById('background_url').value = config_arr['background_url'];
