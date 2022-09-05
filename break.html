@@ -19,6 +19,26 @@
             height: 100vh;
             object-fit: fill;
         }
+        #fullscreen_open {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            padding-bottom: 5px;
+        }
+        #fullscreen_open:hover {
+            background-color: white;
+        }
+        #fullscreen_close {
+            display: none;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            padding-bottom: 5px;
+        }
+        #fullscreen_close:hover {
+            background-color: white;
+        }
         #logo {
             position:relative;
             z-index:50;
@@ -51,8 +71,18 @@
         #main_timer_text_color {
             color: black;
         }
+        #options {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            padding-bottom: 5px;
+        }
+        #options:hover {
+            background-color: white;
+        }
         #show_settings {
-            height: 50;
+            position:absolute;
         }
         #timer_settings {
             z-index:99;
@@ -181,7 +211,7 @@
         <div id="logo"></div>
 
         <div id="show_settings">
-            <span onclick="document.getElementById('timer_settings').style.display='inline-block';">...</span>
+            <span id="options" onclick="document.getElementById('timer_settings').style.display='inline-block';">...</span>
             <span id="fullscreen_open" onclick="fullscreen_open();">&uarr;</span>
             <span id="fullscreen_close" onclick="fullscreen_close();" style="display: none;">&darr;</span>
         </div>
