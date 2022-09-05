@@ -19,16 +19,24 @@
             height: 100vh;
             object-fit: fill;
         }
+        #logo {
+            position:relative;
+            z-index:50;
+            display:none;
+            margin-top: 5vh;
+            margin-right: 5vh;
+            float: right;
+        }
         #main_content {
             position: fixed;
             bottom: 0;
             width: 100%;
-            height: 95vh;
+            height: 100vh;
         }
         #main_remaining {
             font-size: 10em;
             width:100%;
-            margin-top: 10vh;
+            margin-top: 15vh;
             margin-left: auto;
             margin-right: auto;
             text-align: center;
@@ -144,9 +152,15 @@
 
         <br/>
 
+        <label>Logo URL</label>
+        <br/>
+        <input type="text" id="logo_url" size="80" onchange="logo_update()" value=""/>
+        
+        <br/>
+
         <label>Background URL</label>
         <br/>
-        <input type="test" id="background_url" size="80" onchange="background_update()" value="https://img.freepik.com/free-vector/watercolor-abstract-purple-background_23-2149120778.jpg"/>
+        <input type="text" id="background_url" size="80" onchange="background_update()" value="https://img.freepik.com/free-vector/watercolor-abstract-purple-background_23-2149120778.jpg"/>
         <br/>
         <button onclick="background_update()">Update</button>
 
@@ -164,6 +178,8 @@
     </video>
 
     <div id="main_content">
+
+        <div id="logo"></div>
 
         <div id="show_settings">
             <span onclick="document.getElementById('timer_settings').style.display='inline-block';">...</span>
@@ -297,6 +313,7 @@
                 result['font_color'] = config_array['font_color'];
                 result['timezones_color'] = config_array['timezones_color'];
                 result['background_url'] = config_array['background_url'];
+                result['logo_url'] = config_array['logo_url'];
                 result['timezones'] = config_array['timezones'];
 
                 return JSON.stringify(result);
@@ -354,6 +371,11 @@
                     document.getElementById('timezones_text_color').value = config_arr['timezones_color'];
                     this.timezones_text_color();
                     
+                    // Logo URL
+                    document.getElementById('logo_url').value = config_arr['logo_url'];
+                    console.log("loading logo as " + config_arr['logo_url']);
+                    this.logo_update();
+                    
                     // Background URL
                     document.getElementById('background_url').value = config_arr['background_url'];
                     console.log("loading background as " + config_arr['background_url']);
@@ -400,6 +422,7 @@
                 config_array['timezone_local'] = this.localtimezone;
                 config_array['font_color'] = document.getElementById('main_timer_text_color').value;
                 config_array['timezones_color'] = document.getElementById('timezones_text_color').value;
+                config_array['logo_url'] = document.getElementById('logo_url').value;
                 config_array['background_url'] = document.getElementById('background_url').value;
                 config_array['timezones'] = this.timezone_list_active();
 
@@ -451,6 +474,28 @@
                 }
                 document.getElementById('fullscreen_close').style.display = 'none';
                 document.getElementById('fullscreen_open').style.display = 'inline-block';
+            }
+
+
+            logo_image_update() {
+                var logo_url = document.getElementById('logo_url').value;
+                var logo_div = document.getElementById('logo');
+                if (logo_url == "") {
+                    logo_div.style.display = "none";
+                }
+                else {
+                    var new_img = document.createElement('img');
+                    new_img.src = logo_url;
+                    
+                    logo_div.innerHTML = "";
+                    logo_div.appendChild(new_img);
+                    logo_div.style.display = "inline-block";
+                }
+            }
+
+
+            logo_update() {
+                this.logo_image_update();
             }
 
 
@@ -766,6 +811,7 @@
         timer.timezone_list_main_display();
 
         timer.background_update(); // always reload the background on reload
+        timer.logo_update(); // always reload the background on reload
     
         timer.config_url_parser(); // tmp
 
@@ -774,6 +820,7 @@
         timer.background_update(); // tmp
 
         background_update = () => timer.background_update();
+        logo_update = () => timer.logo_update();
         main_timer_text_color = () => timer.main_timer_text_color();
         remaining_update = () => timer.remaining_autoupdate();
         timezones_text_color = () => timer.timezones_text_color();
