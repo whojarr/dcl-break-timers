@@ -44,3 +44,5 @@ poetry install
 poetry shell
 python ./app.py
 ```
+
+open browser to https://localhost:5000/
