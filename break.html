@@ -401,7 +401,10 @@
                     this.timezones_text_color();
                     
                     // Logo URL
-                    if (config_arr['logo_url'] != 'undefined') {
+                    if (config_arr['logo_url'] == 'undefined') {
+                        document.getElementById('logo_url').value = "";
+                    }
+                    else {
                         document.getElementById('logo_url').value = config_arr['logo_url'];
                         console.log("loading logo as " + config_arr['logo_url']);
                         this.logo_update();
