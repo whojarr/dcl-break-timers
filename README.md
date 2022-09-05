@@ -14,7 +14,7 @@
 
 
 
-## use
+## basic use
 
 ### online
 
@@ -25,3 +25,22 @@ https://whojarr.github.io/dcl-break-timers/break.html
 The break.html file is full self contained. its is also all contained inside the body of the page.
 
 this can be run local, upstream or the body of the html document pasted anywhere that accepts html, js and css. 
+
+
+## advanced use
+
+this can be run over https on the local machine or upstream using a python flask app. 
+
+### requires
+
+* python 3.8
+
+* poetry
+
+### run
+
+```shell
+poetry install
+poetry shell
+python ./app.py
+```
