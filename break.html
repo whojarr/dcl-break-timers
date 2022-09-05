@@ -35,19 +35,18 @@
         }
         #main_remaining {
             font-size: 10em;
-            width:100%;
             margin-top: 15vh;
-            margin-left: auto;
-            margin-right: auto;
             text-align: center;
+        }
+        #main_text {
+            width:100%;
+            position: absolute;
+            top: 50%;
+            margin-top: -20%;
+            margin-left: auto;
         }
         #main_timezones {
             font-size: 3em;
-            width:100%;
-            margin-left: auto;
-            margin-right: auto;
-            margin-bottom: 10%;
-            text-align: center;
         }
         #main_timer_text_color {
             color: black;
@@ -186,20 +185,20 @@
             <span id="fullscreen_open" onclick="fullscreen_open();">&uarr;</span>
             <span id="fullscreen_close" onclick="fullscreen_close();" style="display: none;">&darr;</span>
         </div>
+        <div id="main_text">
+            <div id="main_remaining" class="main_remaining"></div>
 
-        <div id="main_remaining" class="main_remaining"></div>
-
-        <div id="main_timezones">
-            <table id="timezone_main_table">
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </table>
+            <div id="main_timezones">
+                <table id="timezone_main_table">
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
         </div>
-
     </div>
     <script>
 
