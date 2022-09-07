@@ -97,6 +97,12 @@
             background-color: rgb(235, 199, 255);
             box-shadow: 2px 2px;
         }
+        .timezone_date {
+            display: inline-block;
+            width: 80px;
+            padding-left: 10px;
+            text-align: right;
+        }
         .timezone_name {
             display: inline-block;
             width: 120px;
@@ -106,6 +112,11 @@
             display: inline-block;
             width: 80px;
             padding-left: 10px;
+            text-align: right;
+        }
+        .timezone_date_main {
+            font-size: 0.4em;
+            padding-right: 50px;
             text-align: right;
         }
         .timezone_name_main {
@@ -124,6 +135,7 @@
         }
         #timezone_main_table td {
             padding-left: 5px;
+            vertical-align: baseline;
         }
         #timezones_text_color {
             color: black;
@@ -642,7 +654,11 @@
                     var timezone_value = timezone_enabled_element.value;
 
                     var zonetime_from = this.timezone_convert(remaining_time['start_original'], timezone_value);
+                    var zonetime_from_year = zonetime_from.getFullYear();
+                    var zonetime_from_month = zonetime_from.getMonth();
+                    var zonetime_from_day = zonetime_from.getDate();
                     var zonetime_from_hrs = zonetime_from.getHours();
+                    console.log(zonetime_from, zonetime_from_month);
                     var zonetime_from_ampm = "am";
                     if (zonetime_from_hrs > 12) {
                         zonetime_from_ampm = "pm";
@@ -653,9 +669,14 @@
                         zonetime_from_mins = '0' + zonetime_from_mins;
                     }
                     var zonetime_from_display = zonetime_from_hrs + ":" + zonetime_from_mins + " " + zonetime_from_ampm;
+                    var zonetime_from_date_display = zonetime_from_day + "-" + zonetime_from_month + "-" + zonetime_from_year
 
                     var zonetime_to = this.timezone_convert(remaining_time['stop'], timezone_value);
+                    var zonetime_to_year = zonetime_to.getFullYear();
+                    var zonetime_to_month = zonetime_to.getMonth();
+                    var zonetime_to_day = zonetime_to.getDate();
                     var zonetime_to_hrs = zonetime_to.getHours();
+
                     var zonetime_to_ampm = "am";
                     if (zonetime_to_hrs > 12) {
                         zonetime_to_ampm = "pm";
@@ -669,9 +690,11 @@
 
                     document.getElementById('timezone_time_from_' + index).innerHTML = zonetime_from_display;
                     document.getElementById('timezone_time_to_' + index).innerHTML = zonetime_to_display;
+                    document.getElementById('timezone_date_' + index).innerHTML = zonetime_from_date_display;
 
                     if (enabled) {
                         document.getElementById('timezone_main_' + index).style.display='';
+                        document.getElementById('timezone_date_main_' + index).innerHTML = zonetime_from_date_display;
                         document.getElementById('timezone_time_main_from_' + index).innerHTML = zonetime_from_display;
                         document.getElementById('timezone_time_main_seperator_' + index).innerHTML = " - ";
                         document.getElementById('timezone_time_main_to_' + index).innerHTML = zonetime_to_display;
@@ -845,14 +868,18 @@
 
                 timezones.forEach(function (item, index) {
 
-                    var label = document.createElement('span');
-                    label.className = 'timezone_name';
-                    label.innerHTML = item['label'];
-
                     var checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
                     checkbox.id = 'timezone_enabled_' + index;
                     checkbox.value = item['timezone'];
+
+                    var label = document.createElement('span');
+                    label.className = 'timezone_name';
+                    label.innerHTML = item['label'];
+
+                    var datedisplay = document.createElement('span');
+                    datedisplay.className = 'timezone_date';
+                    datedisplay.id = 'timezone_date_' + index;
 
                     var timedisplay_from = document.createElement('span');
                     timedisplay_from.className = 'timezone_time';
@@ -867,6 +894,7 @@
                     div.appendChild(label);
                     div.appendChild(timedisplay_from);
                     div.appendChild(timedisplay_to);
+                    div.appendChild(datedisplay);
 
                     document.getElementById(timezone_element_id).appendChild(div);
 
@@ -886,6 +914,10 @@
                     label.id = 'timezone_name_main_' + index;
                     label.innerHTML = item['label'];
 
+                    var datedisplay = document.createElement('td');
+                    datedisplay.className = 'timezone_date_main';
+                    datedisplay.id = 'timezone_date_main_' + index;
+
                     var timedisplay_from = document.createElement('td');
                     timedisplay_from.className = 'timezone_time_from_main';
                     timedisplay_from.id = 'timezone_time_main_from_' + index;
@@ -904,6 +936,7 @@
                     tr.appendChild(timedisplay_from);
                     tr.appendChild(timedisplay_seperator);
                     tr.appendChild(timedisplay_to);
+                    tr.appendChild(datedisplay);
 
                     document.getElementById('timezone_main_table').appendChild(tr);
 
