@@ -178,7 +178,10 @@
         <label>Share URL</label>
         <a id="config_url" href="" onmouseover="config_url_update();" style="display:none;">Share</a>
         <button onclick="config_to_clipboard();">Copy to clipboard</button>
-
+        <label for="settings_hide">Hide Settings Screen</label>
+        <input id="settings_hide" type="checkbox" value="1" checked/>
+        <label for="settings_buttons_hide">Hide Settings Screen Buttons</label>
+        <input id="settings_open_hide" type="checkbox" value="1"/>
         <br/>
 
         <label>Logo URL</label>
@@ -191,9 +194,16 @@
         <br/>
         <input type="text" id="background_url" size="80" onchange="background_update()" value="https://img.freepik.com/free-vector/watercolor-abstract-purple-background_23-2149120778.jpg"/>
         <br/>
+
+        <!--
+        <label for="opacity">Opacity:</label>
+        <input type="range" id="opacity" name="opacity" min="0" max="1" step="0.05" onchange="background_opacity_update();"/>
+        <br/>
+        -->
+
         <button onclick="background_update()">Update</button>
 
-        <br/>
+        <br/
         <br/>
 
 
@@ -293,6 +303,11 @@
             }
 
 
+            background_image_opacity_update() {
+                document.body.style.opacity = document.getElementById('opacity').value;
+            }
+
+
             background_image_update() {
                 var url = document.getElementById('background_url').value;
                 document.body.style.backgroundImage = 'url(' + url + ')';
@@ -301,6 +316,17 @@
                 this.background_video_disable();
             }
 
+
+            background_opacity_update() {
+                var url = document.getElementById('background_url').value;
+                var file_suffix = url.split('.').pop();
+                if (file_suffix == 'mp4') {
+                    this.background_video_opacity_update();
+                }
+                else {
+                    this.background_image_opacity_update();
+                }
+            }
 
             background_update() {
                 var url = document.getElementById('background_url').value;
@@ -311,7 +337,6 @@
                 else {
                     this.background_image_update();
                 }
-                // this.config_url_update();
             }
 
 
@@ -324,6 +349,12 @@
             background_video_enable() {
                 var vid = document.getElementById('background_video');
                 vid.style.display = '';
+            }
+
+
+            background_video_opacity_update() {
+                var vid = document.getElementById('background_video');
+                vid.style.opacity = document.getElementById('opacity').value;
             }
 
 
@@ -344,6 +375,10 @@
                 result['background_url'] = config_array['background_url'];
                 result['logo_url'] = config_array['logo_url'];
                 result['timezones'] = config_array['timezones'];
+                result['settings_hide'] = config_array['settings_hide'];
+                result['settings_open_hide'] = config_array['settings_open_hide'];
+                
+                
 
                 return JSON.stringify(result);
             }
@@ -414,6 +449,16 @@
                     document.getElementById('background_url').value = config_arr['background_url'];
                     console.log("loading background as " + config_arr['background_url']);
                     this.background_update();
+
+                    // settings_hide
+                    if (config_arr['settings_hide']) {
+                        document.getElementById('timer_settings').style.display='none';
+                    };
+                    // settings_open_hide
+                    if (config_arr['settings_open_hide']) {
+                        document.getElementById('options').style.display='none';
+                    };
+
                 } else {
                     console.log("no config found in the url");
                 }
@@ -459,6 +504,18 @@
                 config_array['logo_url'] = document.getElementById('logo_url').value;
                 config_array['background_url'] = document.getElementById('background_url').value;
                 config_array['timezones'] = this.timezone_list_active();
+
+                if (document.getElementById('settings_hide').checked) {
+                    config_array['settings_hide'] = true;
+                } else {
+                    config_array['settings_hide'] = false;
+                };
+
+                if (document.getElementById('settings_open_hide').checked) {
+                    config_array['settings_open_hide'] = true;
+                } else {
+                    config_array['settings_open_hide'] = false;
+                };
 
                 return config_array
             }
@@ -854,6 +911,7 @@
         timer.background_update(); // tmp
 
         background_update = () => timer.background_update();
+        // background_opacity_update = () => timer.background_opacity_update();
         logo_update = () => timer.logo_update();
         main_timer_text_color = () => timer.main_timer_text_color();
         remaining_update = () => timer.remaining_autoupdate();
