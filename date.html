@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+</head>
+
+<body id="body">
+
+    <style>
+        body {
+            font-family: "Open Sans",sans-serif;
+            padding: 0%;
+            margin: 0%;
+        }
+        #background_video {
+            z-index:-1;
+            min-width: 100%;
+            height: 100vh;
+            object-fit: fill;
+        }
+        #fullscreen_open {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            padding-bottom: 5px;
+        }
+        #fullscreen_open:hover {
+            background-color: white;
+        }
+        #fullscreen_close {
+            display: none;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            padding-bottom: 5px;
+        }
+        #fullscreen_close:hover {
+            background-color: white;
+        }
+        #logo {
+            position:relative;
+            z-index:50;
+            display:none;
+            margin-top: 5vh;
+            margin-right: 5vh;
+            float: right;
+        }
+        #main_content {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 100vh;
+        }
+        #main_remaining {
+            font-size: 10em;
+            margin-top: 15vh;
+            text-align: center;
+        }
+        #main_text {
+            width:100%;
+            position: absolute;
+            top: 50%;
+            margin-top: -20%;
+            margin-left: auto;
+        }
+        #main_timezones {
+            font-size: 3em;
+        }
+        #main_timer_text_color {
+            color: black;
+        }
+        #options {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            padding-bottom: 5px;
+        }
+        #options:hover {
+            background-color: white;
+        }
+        #show_settings {
+            position:absolute;
+        }
+        #timer_settings {
+            z-index:99;
+            opacity: 0.8;
+            padding: 20px;
+            position:absolute;
+            top: 5%;
+            left: 5%;
+            border: 1px;
+            border-style: solid;
+            border-color: black;
+            background-color: rgb(235, 199, 255);
+            box-shadow: 2px 2px;
+        }
+        .timezone_name {
+            display: inline-block;
+            width: 120px;
+            padding-left: 10px;
+        }
+        .timezone_time {
+            display: inline-block;
+            width: 80px;
+            padding-left: 10px;
+            text-align: right;
+        }
+        .timezone_name_main {
+            padding-right: 50px;
+            text-align: right;
+        }
+        .timezone_time_from_main {
+            text-align: right;
+        }
+        .timezone_time_to_main {
+            text-align: left;
+        }
+        #timezone_main_table {
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #timezone_main_table td {
+            padding-left: 5px;
+        }
+        #timezones_text_color {
+            color: black;
+        }
+    </style>
+
+    <div id="timer_settings">
+
+        <h1>Timer</h1>
+
+        <div id="current_time"></div>
+
+        <br/>
+        <br/>
+
+        <label>Starts</label>
+        <input type="date" onchange="remaining_update()" id="start_date">
+        <input type="time" value="12:00" onchange="remaining_update()" id="start">
+        <label>Ends</label>
+        <input type="date" onchange="remaining_update()" id="stop_date">
+        <input type="time" value="12:00" onchange="remaining_update()" id="stop">
+        <span id="local_timezone"></span>
+
+        <br/>
+        <br/>
+
+        <label>Remaining</label>
+        <span id="remaining"></span>
+
+        <br/>
+
+        <progress value="0" max="10" id="progressBar"></progress>
+        <br/>
+        <br/>
+
+        <label>Display Timezones</label>
+        <div id="timezones"></div>
+
+        <br/>
+        <br/>
+
+
+        <label>Colours</label>
+        <div id="colours">
+            <label>Timer</label>
+            <input type="color" id="main_timer_text_color" value="#000000" onchange="main_timer_text_color();" onclick="main_timer_text_color();"/>
+            <br/>
+            <label>Timezones</label>
+            <input type="color" id="timezones_text_color" onchange="timezones_text_color()" onclick="timezones_text_color()"/>
+        </div>
+
+        <br/>
+
+        <label>Share URL</label>
+        <a id="config_url" href="" onmouseover="config_url_update();" style="display:none;">Share</a>
+        <button onclick="config_to_clipboard();">Copy to clipboard</button>
+        <label for="settings_hide">Hide Settings Screen</label>
+        <input id="settings_hide" type="checkbox" value="1" checked/>
+        <label for="settings_buttons_hide">Hide Settings Screen Buttons</label>
+        <input id="settings_open_hide" type="checkbox" value="1"/>
+        <br/>
+
+        <label>Logo URL</label>
+        <br/>
+        <input type="text" id="logo_url" size="80" onchange="logo_update()" value=""/>
+        
+        <br/>
+
+        <label>Background URL</label>
+        <br/>
+        <input type="text" id="background_url" size="80" onchange="background_update()" value="https://img.freepik.com/free-vector/watercolor-abstract-purple-background_23-2149120778.jpg"/>
+        <br/>
+
+        <!--
+        <label for="opacity">Opacity:</label>
+        <input type="range" id="opacity" name="opacity" min="0" max="1" step="0.05" onchange="background_opacity_update();"/>
+        <br/>
+        -->
+
+        <button onclick="background_update()">Update</button>
+
+        <br/
+        <br/>
+
+
+        <button onclick="document.getElementById('timer_settings').style.display='none';">Hide</button>
+
+    </div>
+
+
+    <video autoplay muted loop id="background_video" style="display:none;">
+        <source id="background_video_content" src="https://cdn.videvo.net/videvo_files/video/free/2013-07/large_watermarked/hd0186_preview.mp4" type="video/mp4" crossorigin="anonymous">
+    </video>
+
+    <div id="main_content">
+
+        <div id="logo"></div>
+
+        <div id="show_settings">
+            <span id="options" onclick="document.getElementById('timer_settings').style.display='inline-block';">...</span>
+            <span id="fullscreen_open" onclick="fullscreen_open();">&uarr;</span>
+            <span id="fullscreen_close" onclick="fullscreen_close();" style="display: none;">&darr;</span>
+        </div>
+        <div id="main_text">
+            <div id="main_remaining" class="main_remaining"></div>
+
+            <div id="main_timezones">
+                <table id="timezone_main_table">
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        class DCTimer {
+            constructor() {
+                this.timer_enabled = false;
+                this.clock_date = new Date();
+                this.clock_element_id = '';
+                this.timer_remaining = 0;
+                this.timer_start_element_id = '';
+                this.timer_end_element_id = '';
+                this.remaining_element_id = '';
+                this.localtimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                this.timezones_element_id = '';
+                this.timezones_main_element_id = '';
+
+                this.timezones = [
+                    {
+                        "timezone": "Pacific/Auckland",
+                        "label": "Auckland"
+                    },
+                    {
+                        "timezone": "Australia/Sydney",
+                        "label": "Sydney"
+                    },
+                    {
+                        "timezone": "Australia/Brisbane",
+                        "label": "Brisbane"
+                    },
+                    {
+                        "timezone": "Australia/Perth",
+                        "label": "Perth"
+                    },
+                    {
+                        "timezone": "America/Los_Angeles",
+                        "label": "Los Angeles"
+                    },
+                    {
+                        "timezone": "America/Denver",
+                        "label": "Denver"
+                    },
+                    {
+                        "timezone": "America/Chicago",
+                        "label": "Chicago"
+                    },
+                    {
+                        "timezone": "America/New_York",
+                        "label": "New York"
+                    },
+                    {
+                        "timezone": "Europe/London",
+                        "label": "London"
+                    }
+                ];
+
+            }
+
+
+            background_image_disable() {
+                var url = document.getElementById('background_url').value;
+                document.body.style.backgroundImage = '';
+            }
+
+
+            background_image_opacity_update() {
+                document.body.style.opacity = document.getElementById('opacity').value;
+            }
+
+
+            background_image_update() {
+                var url = document.getElementById('background_url').value;
+                document.body.style.backgroundImage = 'url(' + url + ')';
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundRepeat = 'no-repeat';
+                this.background_video_disable();
+            }
+
+
+            background_opacity_update() {
+                var url = document.getElementById('background_url').value;
+                var file_suffix = url.split('.').pop();
+                if (file_suffix == 'mp4') {
+                    this.background_video_opacity_update();
+                }
+                else {
+                    this.background_image_opacity_update();
+                }
+            }
+
+            background_update() {
+                var url = document.getElementById('background_url').value;
+                var file_suffix = url.split('.').pop();
+                if (file_suffix == 'mp4') {
+                    this.background_video_update();
+                }
+                else {
+                    this.background_image_update();
+                }
+            }
+
+
+            background_video_disable() {
+                var vid = document.getElementById('background_video');
+                vid.style.display = 'None';
+            }
+
+
+            background_video_enable() {
+                var vid = document.getElementById('background_video');
+                vid.style.display = '';
+            }
+
+
+            background_video_opacity_update() {
+                var vid = document.getElementById('background_video');
+                vid.style.opacity = document.getElementById('opacity').value;
+            }
+
+
+            background_video_update() {
+                var url = document.getElementById('background_url').value;
+                var vid = document.getElementById('background_video').src = url;
+                this.background_video_enable();
+            }
+
+            config_json() {
+                var config_array = this.config_screen_get_array();
+                var result = {};
+                result['start'] = config_array['start'].toJSON();
+                result['end'] = config_array['end'].toJSON();
+                result['timezone'] = config_array['timezone_local'];
+                result['font_color'] = config_array['font_color'];
+                result['timezones_color'] = config_array['timezones_color'];
+                result['background_url'] = config_array['background_url'];
+                result['logo_url'] = config_array['logo_url'];
+                result['timezones'] = config_array['timezones'];
+                result['settings_hide'] = config_array['settings_hide'];
+                result['settings_open_hide'] = config_array['settings_open_hide'];
+                
+                
+
+                return JSON.stringify(result);
+            }
+
+
+            config_to_clipboard() {
+                this.config_url_update();
+
+                var text = document.getElementById('config_url').href;
+                if (window.clipboardData && window.clipboardData.setData) {
+                    // Internet Explorer-specific code path to prevent textarea being shown while dialog is visible.
+                    return window.clipboardData.setData("Text", text);
+
+                }
+                else if (document.queryCommandSupported && document.queryCommandSupported("copy")) {
+                    var textarea = document.createElement("textarea");
+                    textarea.textContent = text;
+                    textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in Microsoft Edge.
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+                    }
+                    catch (ex) {
+                        console.warn("Copy to clipboard failed.", ex);
+                        return prompt("Copy to clipboard: Ctrl+C, Enter", text);
+                    }
+                    finally {
+                        document.body.removeChild(textarea);
+                    }
+                }
+            }
+
+
+            config_url_apply() {
+                var config_arr = this.config_url_parser();
+                if ( 'start' in config_arr ) {
+
+                    // Start Date
+                    var incomming_date_start = new Date(config_arr['start']);
+ 
+                    var utc_date_start_y = incomming_date_start.getFullYear();
+                    var utc_date_start_m = incomming_date_start.getMonth();
+                    var utc_date_start_d = incomming_date_start.getDate();
+                    var utc_date_start_h = incomming_date_start.getHours();
+                    var utc_date_start_i = incomming_date_start.getMinutes();
+                    var utc_date_start = new Date(Date.UTC(utc_date_start_y, utc_date_start_m, utc_date_start_d, utc_date_start_h, utc_date_start_i, 0));
+
+                    var new_date_start_local = this.timezone_convert(utc_date_start, this.localtimezone);
+                    document.getElementById(this.timer_start_element_id).value = new_date_start_local.toISOString().substring(11,16);
+                    document.getElementById('start_date').value = utc_date_start.toISOString().split('T')[0];
+
+                    // End Date
+                    var incomming_date_end = new Date(config_arr['end']);
+ 
+                    var utc_date_end_y = incomming_date_end.getFullYear();
+                    var utc_date_end_m = incomming_date_end.getMonth();
+                    var utc_date_end_d = incomming_date_end.getDate();
+                    var utc_date_end_h = incomming_date_end.getHours();
+                    var utc_date_end_i = incomming_date_end.getMinutes();
+                    var utc_date_end = new Date(Date.UTC(utc_date_end_y, utc_date_end_m, utc_date_end_d, utc_date_end_h, utc_date_end_i, 0));
+
+                    var new_date_end_local = this.timezone_convert(utc_date_end, this.localtimezone);
+                    document.getElementById(this.timer_end_element_id).value = new_date_end_local.toISOString().substring(11,16);
+                    document.getElementById('stop_date').value = utc_date_end.toISOString().split('T')[0];
+
+
+                    // Timezones
+                    this.timezone_list_update(config_arr['timezones'])
+
+                    // Font Colors
+                    document.getElementById('main_timer_text_color').value = config_arr['font_color'];
+                    this.main_timer_text_color();
+                    document.getElementById('timezones_text_color').value = config_arr['timezones_color'];
+                    this.timezones_text_color();
+                    
+                    // Logo URL
+                    if (config_arr['logo_url'] === 'undefined') {
+                        document.getElementById('logo_url').value = "";
+                    }
+                    else {
+                        document.getElementById('logo_url').value = config_arr['logo_url'];
+                        console.log("loading logo as " + config_arr['logo_url']);
+                        this.logo_update();
+                    }
+                    
+                    // Background URL
+                    document.getElementById('background_url').value = config_arr['background_url'];
+                    console.log("loading background as " + config_arr['background_url']);
+                    this.background_update();
+
+                    // settings_hide
+                    if (config_arr['settings_hide']) {
+                        document.getElementById('timer_settings').style.display='none';
+                    };
+                    // settings_open_hide
+                    if (config_arr['settings_open_hide']) {
+                        document.getElementById('options').style.display='none';
+                    };
+
+                } else {
+                    console.log("no config found in the url");
+                }
+
+            }
+
+            config_url_parser() {
+                var config_arr = [];
+                const urlSearchParams = new URLSearchParams(window.location.search);
+                const params = Object.fromEntries(urlSearchParams.entries());
+                if ( 'config' in params ) {
+                    var config = decodeURI(params['config']);
+                    config_arr = JSON.parse(config);
+                }
+                return config_arr;
+            }
+
+
+            config_url_update() {
+                var url_json = this.config_json();
+                var url_encoded  = encodeURIComponent(url_json);
+                var curr_loc = document.location;
+                if (curr_loc.protocol == 'file:') {
+                    var new_url = 'file://' + curr_loc.pathname + "?config=" + url_encoded;
+                    document.getElementById('config_url').href = new_url;
+                }
+                else {
+                    var new_url = document.location.origin + document.location.pathname + "?config=" + url_encoded;
+                    document.getElementById('config_url').href = new_url;
+                    // /window.history.pushState({"config": url_encoded}, "Updated", new_url);
+                }
+            }
+
+
+            config_screen_get_array() {
+                var config_array = {}
+                var times = this.startstop_to_remaining();
+                console.log(times);
+
+                //config_array['start'] = document.getElementById(this.timer_start_element_id).valueAsDate;
+                config_array['start'] = times['start_original'];
+                config_array['end'] = times['stop'];
+                config_array['timezone_local'] = this.localtimezone;
+                config_array['font_color'] = document.getElementById('main_timer_text_color').value;
+                config_array['timezones_color'] = document.getElementById('timezones_text_color').value;
+                config_array['logo_url'] = document.getElementById('logo_url').value;
+                config_array['background_url'] = document.getElementById('background_url').value;
+                config_array['timezones'] = this.timezone_list_active();
+
+                if (document.getElementById('settings_hide').checked) {
+                    config_array['settings_hide'] = true;
+                } else {
+                    config_array['settings_hide'] = false;
+                };
+
+                if (document.getElementById('settings_open_hide').checked) {
+                    config_array['settings_open_hide'] = true;
+                } else {
+                    config_array['settings_open_hide'] = false;
+                };
+
+                return config_array
+            }
+
+
+            convert_utc_date_to_local_date(date) {
+                var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+                var offset = date.getTimezoneOffset() / 60;
+                var hours = date.getHours();
+                newDate.setHours(hours - offset);
+
+                return newDate;
+            }
+
+
+            current_time_autoupdate() {
+                if (this.clock_element_id !== '') {
+                    document.getElementById(this.clock_element_id).innerHTML = this.time_now();
+                    setTimeout(() => this.current_time_autoupdate(), 1000);
+                }
+            }
+
+            date_defaults() {
+                document.getElementById('start_date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('stop_date').value = new Date().toISOString().split('T')[0];
+            }
+
+
+            date_now() {
+                var now_date = new Date();
+                var result = now_date.toLocaleDateString();
+
+                return result;
+            }
+
+
+            fullscreen_open() {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) { /* Safari */
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) { /* IE11 */
+                    elem.msRequestFullscreen();
+                }
+                document.getElementById('fullscreen_close').style.display = 'inline-block';
+                document.getElementById('fullscreen_open').style.display = 'none';
+            }
+
+
+            fullscreen_close() {
+                if (document.fullscreen) {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) { /* Safari */
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) { /* IE11 */
+                        document.msExitFullscreen();
+                    }
+                }
+                document.getElementById('fullscreen_close').style.display = 'none';
+                document.getElementById('fullscreen_open').style.display = 'inline-block';
+            }
+
+
+            logo_image_update() {
+                var logo_url = document.getElementById('logo_url').value;
+                var logo_div = document.getElementById('logo');
+                if (logo_url == "") {
+                    logo_div.style.display = "none";
+                }
+                else {
+                    var new_img = document.createElement('img');
+                    new_img.src = logo_url;
+                    
+                    logo_div.innerHTML = "";
+                    logo_div.appendChild(new_img);
+                    logo_div.style.display = "inline-block";
+                }
+            }
+
+
+            logo_update() {
+                this.logo_image_update();
+            }
+
+
+            main_timer_text_color() {
+                var color = document.getElementById('main_timer_text_color').value;
+                document.getElementById('main_remaining').style.color = color;
+            }
+
+
+            remaining_timezone_update(item, index) {
+                var remaining_time = this.startstop_to_remaining();
+                var timezone_enabled_element = document.getElementById('timezone_enabled_' + index);
+                if (timezone_enabled_element) {
+                    var enabled = timezone_enabled_element.checked;
+                    var timezone_value = timezone_enabled_element.value;
+
+                    var zonetime_from = this.timezone_convert(remaining_time['start_original'], timezone_value);
+                    var zonetime_from_hrs = zonetime_from.getHours();
+                    var zonetime_from_ampm = "am";
+                    if (zonetime_from_hrs > 12) {
+                        zonetime_from_ampm = "pm";
+                        zonetime_from_hrs = zonetime_from_hrs - 12;
+                    }
+                    var zonetime_from_mins = zonetime_from.getMinutes();
+                    if (zonetime_from_mins < 10) {
+                        zonetime_from_mins = '0' + zonetime_from_mins;
+                    }
+                    var zonetime_from_display = zonetime_from_hrs + ":" + zonetime_from_mins + " " + zonetime_from_ampm;
+
+                    var zonetime_to = this.timezone_convert(remaining_time['stop'], timezone_value);
+                    var zonetime_to_hrs = zonetime_to.getHours();
+                    var zonetime_to_ampm = "am";
+                    if (zonetime_to_hrs > 12) {
+                        zonetime_to_ampm = "pm";
+                        zonetime_to_hrs = zonetime_to_hrs - 12;
+                    }
+                    var zonetime_to_mins = zonetime_to.getMinutes();
+                    if (zonetime_to_mins < 10) {
+                        zonetime_to_mins = '0' + zonetime_to_mins;
+                    }
+                    var zonetime_to_display = zonetime_to_hrs + ":" + zonetime_to_mins + " " + zonetime_to_ampm;;
+
+                    document.getElementById('timezone_time_from_' + index).innerHTML = zonetime_from_display;
+                    document.getElementById('timezone_time_to_' + index).innerHTML = zonetime_to_display;
+
+                    if (enabled) {
+                        document.getElementById('timezone_main_' + index).style.display='';
+                        document.getElementById('timezone_time_main_from_' + index).innerHTML = zonetime_from_display;
+                        document.getElementById('timezone_time_main_seperator_' + index).innerHTML = " - ";
+                        document.getElementById('timezone_time_main_to_' + index).innerHTML = zonetime_to_display;
+                    }
+                    else {
+                        document.getElementById('timezone_main_' + index).style.display='none';
+                    }
+                }
+            }
+
+
+            remaining_autoupdate(element_id) {
+                if (this.remaining_element_id !== '') {
+                    var remaining_time = this.startstop_to_remaining();
+                    var remaining_time_hr = remaining_time['hr'];
+                    if ( remaining_time_hr < 10) {
+                        remaining_time_hr = "0" + remaining_time_hr;
+                    }
+                    var remaining_time_min = remaining_time['min'];
+                    if ( remaining_time_min < 10) {
+                        remaining_time_min = "0" + remaining_time_min;
+                    }
+                    var remaining_time_sec = remaining_time['sec'];
+                    if ( remaining_time_sec < 10) {
+                        remaining_time_sec = "0" + remaining_time_sec;
+                    }
+
+                    var time_display = remaining_time_hr + ':' + remaining_time_min + ':' + remaining_time_sec;
+                    document.getElementById(this.remaining_element_id).innerHTML = time_display;
+                    document.getElementById('main_remaining').innerHTML = time_display;
+                    var timezones = this.timezones;
+                    for (let index = 0; index < timezones.length; ++index) {
+                        this.remaining_timezone_update(timezones[index], index);
+                    };
+                    setTimeout(() => this.remaining_autoupdate(), 1000);
+                }
+            }
+
+
+            startstop_to_dates() {
+                var start_date_local = new Date();
+                var end_date_local = new Date();
+
+                if (this.timer_start_element_id !== '') {
+                    var start_date_form = document.getElementById(this.timer_start_element_id).valueAsDate;
+                    var start_date_form_local = this.convert_utc_date_to_local_date(start_date_form);
+                    var start_date_form_local_hour = start_date_form_local.getHours();
+                    var start_date_form_local_min = start_date_form_local.getMinutes();
+
+                    if( document.getElementById('start_date').value != 'undefined') {
+                        start_date_local = new Date(document.getElementById('start_date').value + 'T00:00');
+                    };
+
+                    start_date_local.setHours(start_date_form_local_hour);
+                    start_date_local.setMinutes(start_date_form_local_min);
+                    start_date_local.setSeconds(0);
+                }
+
+                if (this.timer_end_element_id !== '') {
+                    var end_date_form = document.getElementById(this.timer_end_element_id).valueAsDate;
+                    var end_date_form_local = this.convert_utc_date_to_local_date(end_date_form);
+                    var end_date_form_local_hour = end_date_form_local.getHours();
+                    var end_date_form_local_min = end_date_form_local.getMinutes();
+
+                    if( document.getElementById('stop_date').value != 'undefined') {
+                        end_date_local = new Date(document.getElementById('stop_date').value + 'T00:00');
+                    };
+
+                    end_date_local.setHours(end_date_form_local_hour);
+                    end_date_local.setMinutes(end_date_form_local_min);
+                    end_date_local.setSeconds(0);
+                }
+
+                if ( end_date_local < start_date_local ) {
+                    end_date_local.setDate(end_date_local.getDate() + 1);
+                }
+
+                return [start_date_local, end_date_local];
+            }
+
+
+            startstop_to_remaining() {
+                var now_date = new Date();
+                var start_date = this.startstop_to_dates()[0];
+                var start_date_original = this.startstop_to_dates()[0];
+                var stop_date = this.startstop_to_dates()[1];
+                if (now_date > start_date && now_date < stop_date) {
+                    start_date = now_date;
+                }
+
+                const diffMs = Math.abs(stop_date - start_date);
+                const diffSec = Math.floor(Math.abs(stop_date - start_date) / 1000);
+                const diffMin = Math.ceil(diffSec/60);
+                const diffHrs = Math.floor(diffMin /60 );
+                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+                var remaining_days = diffDays;
+                var remaining_hrs = diffHrs - (diffDays * 24);
+                var remaining_mins = diffMin - (diffHrs * 60);
+                var remaining_secs = 60 + diffSec - (diffMin * 60);
+                var remaining_ms = diffMs - (diffSec * 1000);
+                if (remaining_secs == 60) {
+                    remaining_secs = 0;
+                }
+                if (remaining_secs > 0) {
+                    remaining_mins = remaining_mins - 1;
+                }
+                if (now_date > stop_date) {
+                    remaining_ms = 0;
+                    remaining_secs = 0;
+                    remaining_mins = 0;
+                    remaining_hrs = 0;
+                    remaining_days = 0;
+                }
+
+                var result = {
+                    "start_original": start_date_original,
+                    "start": start_date,
+                    "stop": stop_date,
+                    "ms": remaining_ms,
+                    "sec": remaining_secs,
+                    "min": remaining_mins,
+                    "hr": remaining_hrs,
+                    "day": remaining_days
+                }
+
+                return result;
+            }
+
+
+            time_now() {
+                var now_date = new Date();
+                var now_time = now_date.toLocaleTimeString();
+
+                return now_time;
+            }
+
+
+            timezone_brisbane_required() {
+                // compare the time in sydney to brisbane and return true if they dont match
+                return true
+            }
+
+            timezone_convert(date, timezone) {
+                return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: timezone}));   
+            }
+
+
+            timezone_list_active() {
+
+                const timezone_element_id = this.timezones_element_id;
+                var timezones = this.timezones;
+                var result = [];
+
+                timezones.forEach(function (item, index) {
+                    const elem = document.getElementById('timezone_enabled_' + index);
+                    if (elem.checked) {
+                        result.push(elem.value);
+                    }
+
+                });
+                return result;
+
+            }
+
+
+            timezone_list_display() {
+
+                var timezone_element_id = this.timezones_element_id;
+                var timezones = this.timezones;
+
+                timezones.forEach(function (item, index) {
+
+                    var label = document.createElement('span');
+                    label.className = 'timezone_name';
+                    label.innerHTML = item['label'];
+
+                    var checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = 'timezone_enabled_' + index;
+                    checkbox.value = item['timezone'];
+
+                    var timedisplay_from = document.createElement('span');
+                    timedisplay_from.className = 'timezone_time';
+                    timedisplay_from.id = 'timezone_time_from_' + index;
+
+                    var timedisplay_to = document.createElement('span');
+                    timedisplay_to.className = 'timezone_time';
+                    timedisplay_to.id = 'timezone_time_to_' + index;
+
+                    var div = document.createElement('div');
+                    div.appendChild(checkbox);
+                    div.appendChild(label);
+                    div.appendChild(timedisplay_from);
+                    div.appendChild(timedisplay_to);
+
+                    document.getElementById(timezone_element_id).appendChild(div);
+
+                });
+            }
+
+
+            timezone_list_main_display() {
+
+                var timezone_main_element_id = this.timezones_main_element_id
+                var timezones = this.timezones;
+
+                timezones.forEach(function (item, index) {
+
+                    var label = document.createElement('td');
+                    label.className = 'timezone_name_main';
+                    label.id = 'timezone_name_main_' + index;
+                    label.innerHTML = item['label'];
+
+                    var timedisplay_from = document.createElement('td');
+                    timedisplay_from.className = 'timezone_time_from_main';
+                    timedisplay_from.id = 'timezone_time_main_from_' + index;
+
+                    var timedisplay_seperator = document.createElement('td');
+                    timedisplay_seperator.className = 'timezone_time_main_seperator';
+                    timedisplay_seperator.id = 'timezone_time_main_seperator_' + index;
+
+                    var timedisplay_to = document.createElement('td');
+                    timedisplay_to.className = 'timezone_time_to_main';
+                    timedisplay_to.id = 'timezone_time_main_to_' + index;
+
+                    var tr = document.createElement('tr');
+                    tr.id = 'timezone_main_' + index;
+                    tr.appendChild(label);
+                    tr.appendChild(timedisplay_from);
+                    tr.appendChild(timedisplay_seperator);
+                    tr.appendChild(timedisplay_to);
+
+                    document.getElementById('timezone_main_table').appendChild(tr);
+
+                });
+            }
+
+
+            timezone_list_update(timezones_enabled_array) {
+                var timezones = this.timezones;
+                timezones.forEach(function (item, index) {
+                    var label = item['label'];
+                    var timezone = item['timezone'];
+                    if (timezones_enabled_array.includes(timezone)) {
+                        document.getElementById('timezone_enabled_' + index).checked=true;
+                    }
+                })
+            }
+
+
+            timezones_text_color() {
+                var color = document.getElementById('timezones_text_color').value;
+                document.getElementById('main_timezones').style.color = color;
+            }
+
+
+        }
+
+        var timer = new DCTimer();
+
+        timer.date_defaults();
+
+        timer.clock_element_id = 'current_time';
+        timer.current_time_autoupdate();
+
+        timer.timer_start_element_id = 'start';
+        timer.timer_end_element_id = 'stop';
+
+        timer.remaining_element_id = 'remaining';
+        timer.remaining_autoupdate();
+
+        timer.timezones_element_id = 'timezones';
+        timer.timezone_list_display();
+
+        timer.timezones_main_element_id = 'main_timezones';
+        timer.timezone_list_main_display();
+
+        timer.logo_update(); // always reload the background on reload
+        timer.config_url_parser(); // tmp
+        timer.config_url_apply(); // always apply the url config on reload
+        timer.background_update(); //always reload the background on reload
+
+        background_update = () => timer.background_update();
+        // background_opacity_update = () => timer.background_opacity_update();
+        logo_update = () => timer.logo_update();
+        main_timer_text_color = () => timer.main_timer_text_color();
+        remaining_update = () => timer.remaining_autoupdate();
+        timezones_text_color = () => timer.timezones_text_color();
+        fullscreen_open = () => timer.fullscreen_open();
+        fullscreen_close = () => timer.fullscreen_close();
+        config_url_update = () => timer.config_url_update();
+        config_to_clipboard = () => timer.config_to_clipboard();
+
+
+        document.onkeydown = function(evt) {
+            evt = evt || window.event;
+            var isEscape = false;
+            if ("key" in evt) {
+                isEscape = (evt.key === "Escape" || evt.key === "Esc");
+            } else {
+                isEscape = (evt.keyCode === 27);
+            }
+            if (isEscape) {
+                document.getElementById('timer_settings').style.display='none';
+            }
+        };
+
+</script>
+
+</body>
+
+</html>
