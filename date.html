@@ -190,7 +190,6 @@
                     <td>From Time</td>
                     <td>To Time</td>
                     <td>From Date</td>
-                    <td>Origin</td>
                 </tr>
                 </thead>
                 <tbody id="timezones_table">
@@ -694,7 +693,7 @@
 
                     var zonetime_from = this.timezone_convert(remaining_time['start_original'], timezone_value);
                     var zonetime_from_year = zonetime_from.getFullYear();
-                    var zonetime_from_month = zonetime_from.getMonth();
+                    var zonetime_from_month = zonetime_from.getMonth() + 1;
                     var zonetime_from_day = zonetime_from.getDate();
                     var zonetime_from_hrs = zonetime_from.getHours();
                     // console.log(zonetime_from, zonetime_from_month);
@@ -712,7 +711,7 @@
 
                     var zonetime_to = this.timezone_convert(remaining_time['stop'], timezone_value);
                     var zonetime_to_year = zonetime_to.getFullYear();
-                    var zonetime_to_month = zonetime_to.getMonth();
+                    var zonetime_to_month = zonetime_to.getMonth() + 1;
                     var zonetime_to_day = zonetime_to.getDate();
                     var zonetime_to_hrs = zonetime_to.getHours();
 
@@ -941,7 +940,7 @@
                     tr.appendChild(timedisplay_from);
                     tr.appendChild(timedisplay_to);
                     tr.appendChild(datedisplay);
-                    tr.appendChild(radio);
+                    // tr.appendChild(radio);
 
                     document.getElementById('timezones_table').appendChild(tr);
 
