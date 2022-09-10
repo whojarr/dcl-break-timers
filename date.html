@@ -54,8 +54,8 @@
             height: 100vh;
         }
         #main_remaining {
-            font-size: 10em;
-            margin-top: 15vh;
+            font-size: 3em;
+            /* margin-top: 15vh; */
             text-align: center;
         }
         #main_text {
@@ -66,10 +66,15 @@
             margin-left: auto;
         }
         #main_timezones {
-            font-size: 3em;
+            font-size: 2em;
         }
         #main_timer_text_color {
             color: black;
+        }
+        #main_title {
+            width:100%;
+            font-size: 6em;
+            text-align: center;
         }
         #options {
             display: inline-block;
@@ -98,24 +103,23 @@
             box-shadow: 2px 2px;
         }
         .timezone_date {
-            display: inline-block;
+            /* display: inline-block; */
             width: 80px;
             padding-left: 10px;
             text-align: right;
         }
         .timezone_name {
-            display: inline-block;
+            /* display: inline-block; */
             width: 120px;
             padding-left: 10px;
         }
         .timezone_time {
-            display: inline-block;
+            /* display: inline-block; */
             width: 80px;
             padding-left: 10px;
             text-align: right;
         }
         .timezone_date_main {
-            font-size: 0.4em;
             padding-right: 50px;
             text-align: right;
         }
@@ -144,8 +148,13 @@
 
     <div id="timer_settings">
 
-        <h1>Timer</h1>
+        <label>Title</label>
+        <input type="text" onchange="title_update()" id="title" value="" size="100"/>
 
+        <br/>
+        <br/>
+
+        <label>Current Time:</label>
         <div id="current_time"></div>
 
         <br/>
@@ -172,7 +181,22 @@
         <br/>
 
         <label>Display Timezones</label>
-        <div id="timezones"></div>
+        <div id="timezones">
+            <table>
+                <thead>
+                <tr>
+                    <td>Show</td>
+                    <td>Timezone</td>
+                    <td>From Time</td>
+                    <td>To Time</td>
+                    <td>From Date</td>
+                    <td>Origin</td>
+                </tr>
+                </thead>
+                <tbody id="timezones_table">
+                </tbody>
+            </table>
+        </div>
 
         <br/>
         <br/>
@@ -227,7 +251,7 @@
 
 
     <video autoplay muted loop id="background_video" style="display:none;">
-        <source id="background_video_content" src="https://cdn.videvo.net/videvo_files/video/free/2013-07/large_watermarked/hd0186_preview.mp4" type="video/mp4" crossorigin="anonymous">
+        <source id="background_video_content" src="blank.mp4" type="video/mp4" crossorigin="anonymous">
     </video>
 
     <div id="main_content">
@@ -240,6 +264,9 @@
             <span id="fullscreen_close" onclick="fullscreen_close();" style="display: none;">&darr;</span>
         </div>
         <div id="main_text">
+
+            <div id="main_title" class="main_title"></div>
+
             <div id="main_remaining" class="main_remaining"></div>
 
             <div id="main_timezones">
@@ -287,6 +314,10 @@
                         "label": "Perth"
                     },
                     {
+                        "timezone": "Europe/London",
+                        "label": "London"
+                    },
+                    {
                         "timezone": "America/Los_Angeles",
                         "label": "Los Angeles"
                     },
@@ -301,10 +332,6 @@
                     {
                         "timezone": "America/New_York",
                         "label": "New York"
-                    },
-                    {
-                        "timezone": "Europe/London",
-                        "label": "London"
                     }
                 ];
 
@@ -381,6 +408,7 @@
             config_json() {
                 var config_array = this.config_screen_get_array();
                 var result = {};
+                result['title'] = config_array['title'];
                 result['start'] = config_array['start'].toJSON();
                 result['end'] = config_array['end'].toJSON();
                 result['timezone'] = config_array['timezone_local'];
@@ -431,8 +459,18 @@
                 var config_arr = this.config_url_parser();
                 if ( 'start' in config_arr ) {
 
+                    // Title
+                    if ('title' in config_arr) {
+                        if ( config_arr['title'] == "") {
+                        }
+                        else {
+                            document.getElementById('title').value = config_arr['title'];
+                        }
+                    }
+
                     // Start Date
                     var incomming_date_start = new Date(config_arr['start']);
+                    this.title_update();
  
                     var utc_date_start_y = incomming_date_start.getFullYear();
                     var utc_date_start_m = incomming_date_start.getMonth();
@@ -533,6 +571,7 @@
                 console.log(times);
 
                 //config_array['start'] = document.getElementById(this.timer_start_element_id).valueAsDate;
+                config_array['title'] = document.getElementById('title').value;
                 config_array['start'] = times['start_original'];
                 config_array['end'] = times['stop'];
                 config_array['timezone_local'] = this.localtimezone;
@@ -658,7 +697,7 @@
                     var zonetime_from_month = zonetime_from.getMonth();
                     var zonetime_from_day = zonetime_from.getDate();
                     var zonetime_from_hrs = zonetime_from.getHours();
-                    console.log(zonetime_from, zonetime_from_month);
+                    // console.log(zonetime_from, zonetime_from_month);
                     var zonetime_from_ampm = "am";
                     if (zonetime_from_hrs > 12) {
                         zonetime_from_ampm = "pm";
@@ -710,21 +749,17 @@
                 if (this.remaining_element_id !== '') {
                     var remaining_time = this.startstop_to_remaining();
                     var remaining_time_hr = remaining_time['hr'];
-                    if ( remaining_time_hr < 10) {
-                        remaining_time_hr = "0" + remaining_time_hr;
-                    }
                     var remaining_time_min = remaining_time['min'];
                     if ( remaining_time_min < 10) {
                         remaining_time_min = "0" + remaining_time_min;
                     }
                     var remaining_time_sec = remaining_time['sec'];
-                    if ( remaining_time_sec < 10) {
-                        remaining_time_sec = "0" + remaining_time_sec;
+                    var time_display = "";
+                    if ((remaining_time_hr + remaining_time_min) > 0) {
+                        time_display = "Duration: " + remaining_time_hr + ":" + remaining_time_min + "hrs";
+                        document.getElementById(this.remaining_element_id).innerHTML = time_display;
+                        document.getElementById('main_remaining').innerHTML = time_display;
                     }
-
-                    var time_display = remaining_time_hr + ':' + remaining_time_min + ':' + remaining_time_sec;
-                    document.getElementById(this.remaining_element_id).innerHTML = time_display;
-                    document.getElementById('main_remaining').innerHTML = time_display;
                     var timezones = this.timezones;
                     for (let index = 0; index < timezones.length; ++index) {
                         this.remaining_timezone_update(timezones[index], index);
@@ -868,35 +903,47 @@
 
                 timezones.forEach(function (item, index) {
 
-                    var checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.id = 'timezone_enabled_' + index;
-                    checkbox.value = item['timezone'];
+                    var checkbox = document.createElement('td');
+                    var checkbox_input = document.createElement('input');
+                    checkbox_input.type = 'checkbox';
+                    checkbox_input.id = 'timezone_enabled_' + index;
+                    checkbox_input.value = item['timezone'];
+                    checkbox.appendChild(checkbox_input);
 
-                    var label = document.createElement('span');
+                    var label = document.createElement('td');
                     label.className = 'timezone_name';
                     label.innerHTML = item['label'];
 
-                    var datedisplay = document.createElement('span');
+                    var datedisplay = document.createElement('td');
                     datedisplay.className = 'timezone_date';
                     datedisplay.id = 'timezone_date_' + index;
 
-                    var timedisplay_from = document.createElement('span');
+                    var timedisplay_from = document.createElement('td');
                     timedisplay_from.className = 'timezone_time';
                     timedisplay_from.id = 'timezone_time_from_' + index;
 
-                    var timedisplay_to = document.createElement('span');
+                    var timedisplay_to = document.createElement('td');
                     timedisplay_to.className = 'timezone_time';
                     timedisplay_to.id = 'timezone_time_to_' + index;
 
-                    var div = document.createElement('div');
-                    div.appendChild(checkbox);
-                    div.appendChild(label);
-                    div.appendChild(timedisplay_from);
-                    div.appendChild(timedisplay_to);
-                    div.appendChild(datedisplay);
+                    var radio = document.createElement('td');
+                    var radio_input = document.createElement('input');
+                    radio_input.type = 'radio';
+                    radio_input.name = 'timezone_origin'
+                    radio_input.id = 'timezone_origin_' + index;
+                    radio_input.value = item['timezone'];
+                    radio.appendChild(radio_input);
 
-                    document.getElementById(timezone_element_id).appendChild(div);
+                    var tr = document.createElement('tr');
+                    tr.id = 'timezone_' + index;
+                    tr.appendChild(checkbox);
+                    tr.appendChild(label);
+                    tr.appendChild(timedisplay_from);
+                    tr.appendChild(timedisplay_to);
+                    tr.appendChild(datedisplay);
+                    tr.appendChild(radio);
+
+                    document.getElementById('timezones_table').appendChild(tr);
 
                 });
             }
@@ -933,10 +980,10 @@
                     var tr = document.createElement('tr');
                     tr.id = 'timezone_main_' + index;
                     tr.appendChild(label);
+                    tr.appendChild(datedisplay);
                     tr.appendChild(timedisplay_from);
                     tr.appendChild(timedisplay_seperator);
                     tr.appendChild(timedisplay_to);
-                    tr.appendChild(datedisplay);
 
                     document.getElementById('timezone_main_table').appendChild(tr);
 
@@ -959,6 +1006,13 @@
             timezones_text_color() {
                 var color = document.getElementById('timezones_text_color').value;
                 document.getElementById('main_timezones').style.color = color;
+            }
+
+
+            title_update() {
+                var title = document.getElementById('title');
+                var title_element = document.getElementById('main_title');
+                title_element.innerHTML = title.value;
             }
 
 
@@ -998,6 +1052,7 @@
         fullscreen_close = () => timer.fullscreen_close();
         config_url_update = () => timer.config_url_update();
         config_to_clipboard = () => timer.config_to_clipboard();
+        title_update = () => timer.title_update();
 
 
         document.onkeydown = function(evt) {
