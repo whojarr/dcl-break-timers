@@ -1,5 +1,11 @@
 # Break timer
 
+Contact: David Hunter <dhunter@digitalcreation.co.nz>
+
+Copyright (C) 2022 Digital Creation Ltd 
+
+For license information, see LICENSE.txt
+
 ## Features
 
 * Start stop automatically converted to alternative timezones.
