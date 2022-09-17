@@ -1,10 +1,13 @@
 # Timers
 
+[https://github.com/whojarr/dcl-break-timers](https://github.com/whojarr/dcl-break-timers)
+
 Contact: David Hunter <dhunter@digitalcreation.co.nz>
 
 Copyright (C) 2022 Digital Creation Ltd 
 
 For license information, see [LICENSE.txt](LICENSE.txt)
+
 
 # Break timer
 
