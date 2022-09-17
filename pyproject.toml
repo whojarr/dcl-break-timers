@@ -10,6 +10,7 @@ Flask = "^2.2.2"
 pyOpenSSL = "^22.0.0"
 
 [tool.poetry.dev-dependencies]
+markdown2 = "^2.4.3"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

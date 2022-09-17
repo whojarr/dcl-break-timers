@@ -676,14 +676,18 @@
                 if (this.remaining_element_id !== '') {
                     var remaining_time = this.startstop_to_remaining();
                     var remaining_time_hr = remaining_time['hr'];
+                    var remaining_time_min = remaining_time['min'];
+                    var remaining_time_sec = remaining_time['sec'];
+                    if (remaining_time_min < 0 ) {
+                        remaining_time_min = 59;
+                        remaining_time_hr = remaining_time_hr - 1;
+                    }
                     if ( remaining_time_hr < 10) {
                         remaining_time_hr = "0" + remaining_time_hr;
                     }
-                    var remaining_time_min = remaining_time['min'];
                     if ( remaining_time_min < 10) {
                         remaining_time_min = "0" + remaining_time_min;
                     }
-                    var remaining_time_sec = remaining_time['sec'];
                     if ( remaining_time_sec < 10) {
                         remaining_time_sec = "0" + remaining_time_sec;
                     }
