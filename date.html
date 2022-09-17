@@ -725,6 +725,13 @@
                     var zonetime_from_hrs = zonetime_from.getHours();
                     // console.log(zonetime_from, zonetime_from_month);
                     var zonetime_from_ampm = "am";
+                    if (zonetime_from_hrs == 12) {
+                        zonetime_from_ampm = "pm";
+                    }
+                    if (zonetime_from_hrs == 0) {
+                        zonetime_from_ampm = "am";
+                        zonetime_from_hrs = 12;
+                    }
                     if (zonetime_from_hrs > 12) {
                         zonetime_from_ampm = "pm";
                         zonetime_from_hrs = zonetime_from_hrs - 12;
@@ -743,6 +750,13 @@
                     var zonetime_to_hrs = zonetime_to.getHours();
 
                     var zonetime_to_ampm = "am";
+                    if (zonetime_to_hrs == 12) {
+                        zonetime_to_ampm = "pm";
+                    }
+                    if (zonetime_to_hrs == 0) {
+                        zonetime_to_ampm = "am";
+                        zonetime_to_hrs = 12;
+                    }
                     if (zonetime_to_hrs > 12) {
                         zonetime_to_ampm = "pm";
                         zonetime_to_hrs = zonetime_to_hrs - 12;
@@ -776,6 +790,14 @@
                     var remaining_time = this.startstop_to_remaining();
                     var remaining_time_hr = remaining_time['hr'];
                     var remaining_time_min = remaining_time['min'];
+                    var remaining_time_sec = remaining_time['sec'];
+                    if (remaining_time_min < 0 ) {
+                        remaining_time_min = 59;
+                        remaining_time_hr = remaining_time_hr - 1;
+                    }
+                    if ( remaining_time_hr < 10) {
+                        remaining_time_hr = "0" + remaining_time_hr;
+                    }
                     if ( remaining_time_min < 10) {
                         remaining_time_min = "0" + remaining_time_min;
                     }
