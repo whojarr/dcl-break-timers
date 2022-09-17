@@ -240,7 +240,7 @@
 
 
     <video autoplay muted loop id="background_video" style="display:none;">
-        <source id="background_video_content" src="https://cdn.videvo.net/videvo_files/video/free/2013-07/large_watermarked/hd0186_preview.mp4" type="video/mp4" crossorigin="anonymous">
+        <source id="background_video_content" src="blank.mp4" type="video/mp4" crossorigin="anonymous">
     </video>
 
     <div id="main_content">
@@ -300,6 +300,10 @@
                         "label": "Perth"
                     },
                     {
+                        "timezone": "Europe/London",
+                        "label": "London"
+                    },
+                    {
                         "timezone": "America/Los_Angeles",
                         "label": "Los Angeles"
                     },
@@ -314,10 +318,6 @@
                     {
                         "timezone": "America/New_York",
                         "label": "New York"
-                    },
-                    {
-                        "timezone": "Europe/London",
-                        "label": "London"
                     }
                 ];
 
@@ -633,6 +633,13 @@
                     var zonetime_from = this.timezone_convert(remaining_time['start_original'], timezone_value);
                     var zonetime_from_hrs = zonetime_from.getHours();
                     var zonetime_from_ampm = "am";
+                    if (zonetime_from_hrs == 12) {
+                        zonetime_from_ampm = "pm";
+                    }
+                    if (zonetime_from_hrs == 0) {
+                        zonetime_from_ampm = "am";
+                        zonetime_from_hrs = 12;
+                    }
                     if (zonetime_from_hrs > 12) {
                         zonetime_from_ampm = "pm";
                         zonetime_from_hrs = zonetime_from_hrs - 12;
@@ -646,6 +653,13 @@
                     var zonetime_to = this.timezone_convert(remaining_time['stop'], timezone_value);
                     var zonetime_to_hrs = zonetime_to.getHours();
                     var zonetime_to_ampm = "am";
+                    if (zonetime_to_hrs == 12) {
+                        zonetime_to_ampm = "pm";
+                    }
+                    if (zonetime_to_hrs == 0) {
+                        zonetime_to_ampm = "am";
+                        zonetime_to_hrs = 12;
+                    }
                     if (zonetime_to_hrs > 12) {
                         zonetime_to_ampm = "pm";
                         zonetime_to_hrs = zonetime_to_hrs - 12;
