@@ -17,5 +17,14 @@ def break_html():
 def date_html():
     return render_template("date.html", **locals())
 
+
+@app.route("/dates.html")
+def dates_html():
+    return render_template("dates.html", **locals())
+
+@app.route("/timer.html")
+def timer_html():
+    return render_template("timer.html", **locals())
+
 if __name__ == "__main__":
     app.run(debug=True, ssl_context='adhoc')

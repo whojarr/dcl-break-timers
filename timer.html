@@ -7,59 +7,328 @@
 
 <body>
 
+    <style>
+        body {
+            font-family: "Open Sans",sans-serif;
+            padding: 10%;
+        }
+        .time_input {
+            width: 30px;
+        }
+        .time_input_td {
+            text-align: right
+        }
+        .remaining_td {
+            text-align: right
+        }
+
+    </style>
 
     <h1>Timer</h1>
 
-    <div>
+    <div id="timers">
+        <table id="timers_table">
+            <thead>
+                <tr>
+                    <td>Time (Mins)</td>
+                    <td>Remaining</td>
+                    <td>Start</td>
+                    <td>Stop</td>
+                    <td>Trigger next</td>
+                </tr>
+            </thead>
+            <tbody>
 
-        <progress value="0" max="10" id="progressBar"></progress>
-        <br/>
-        <label>Minutes</label>
-        <input type="text" value="0" size="2" id="minutes">
-        <label>Seconds</label>
-        <input type="text" value="0" size="2" id="seconds">
-        <br/>
-        <label>Remaining</label>
-        <pre id="remaining"></pre> 
-        <br/>
-        <input type="submit" value="Start" onclick="timer_start();"/>
-
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td id="minutes_total" class="time_input_td"></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+        <button onclick="timer_table_tr_add()">Add</button>
     </div>
 
     <script>
 
-        function seconds_to_time(seconds) {
-            var mins = Math.floor(seconds / 60);
-            var secs = seconds - ( mins * 60 );
-            if ( secs < 10 ) {
-                secs = '0' + secs;
+        var timers = [];
+
+        function minutes_to_time(mins) {
+            var minutes = mins;
+            var display_minutes = mins;
+            var hours = 0;
+            if (minutes > 60) {
+                hours = Math.floor(mins / 60);
+                minutes = mins - (hours * 60);
+                display_minutes = minutes;
             }
-            result = mins + ":" + secs;
+            if (minutes < 10) {
+                display_minutes = "0" + minutes + ":00";
+            }
 
-            return result
-        }
+            return hours + ":" + display_minutes;
+        };
 
-        function timer_reset() {
-            
-        }
 
-        function timer_start() {
-            var set_minutes = document.getElementById('minutes').value;
-            var set_seconds = document.getElementById('seconds').value;
-            var seconds = parseInt(set_seconds) + ( parseInt(set_minutes) * 60);
-            document.getElementById('remaining').innerHTML = seconds_to_time(seconds);
-            document.getElementById('progressBar').max = seconds;
-            var timeleft = seconds;
-            var downloadTimer = setInterval(function(){
-                if(timeleft <= 0){
-                    clearInterval(downloadTimer);
+        function remaining_countdown(start_input_id) {
+            const prefix = start_input_id.split('_start_button')[0];
+            var remaining_input_id = prefix + "_remaining_input";
+            var next_timer_prefix ='';
+            var now = new Date();
+            var start_date = new Date();
+            var diff = 0;
+            var remaining_sec = 0;
+            var active = false;
+            let obj = timers.find((o, i) => {
+                if (o.prefix === prefix) {
+                    start_date = timers[i]['start_date'];
+                    diff = Math.round(Math.abs(now - start_date) / 1000);
+                    var remains = timers[i]['remaining_sec'];
+                    var total = timers[i]['total_secs'];
+                    active = timers[i]['active'];
+                    remaining_sec = total - diff;
+                    timers[i]['remaining_sec'] = remaining_sec;
+                    if (remaining_sec < 1) {
+                        active = false;
+                        timers[i]['active'] = active;
+                        timer_index = prefix.replace('timer_', '');
+                        next_timer_index = parseInt(timer_index);
+                        next_timer_id_index = parseInt(timer_index) + 1;
+                        if (timers[next_timer_index] !== undefined) {
+                            next_timer_prefix = 'timer_' +  next_timer_id_index;
+                        }
+                        
+                    }
+                    return true;
                 }
-                document.getElementById("progressBar").value = seconds - timeleft;
-                document.getElementById('remaining').innerHTML = seconds_to_time(timeleft);
-                timeleft -= 1;
-            }, 1000);
+            });
+
+            if (next_timer_prefix !== "") {
+                trigger_next = document.getElementById(prefix + '_trigger_checkbox').checked;
+                if (trigger_next) {
+                    timer_start(next_timer_prefix + '_start_button');
+                }
+            }
+            remaining_redisplay();
+            if (active) {
+                setTimeout(function () { remaining_countdown(start_input_id); }, 1000);
+            }
         }
 
+
+        function remaining_redisplay() {
+            let obj = timers.find((o, i) => {
+                var remaining = timers[i]['remaining_sec']
+                var time = seconds_to_time(remaining);
+                var remaining_id = timers[i]['prefix'] + "_remaining_span";
+                document.getElementById(remaining_id).innerHTML = time;
+            });
+        }
+
+
+        function remaining_reset(stop_button_id) {
+            const prefix = stop_button_id.split('_stop_button')[0];
+            let obj = timers.find((o, i) => {
+                if (o.prefix === prefix) {
+                    //timers[i]['remaining_sec'] = timers[i]['total_secs']
+                    return true;
+                }
+            });
+        }
+
+
+        function remaining_update(time_input_id) {
+            const prefix = time_input_id.split('_time_input')[0];
+            var minutes = document.getElementById(time_input_id).value;
+            var remaining_span_id = time_input_id.replace('time_input', 'remaining_span');
+            var remaining_input_id = time_input_id.replace('time_input', 'remaining_input');
+            document.getElementById(remaining_span_id).innerHTML = minutes_to_time(minutes);
+            document.getElementById(remaining_input_id).value = minutes * 60;
+            var timer_entry = {
+                "prefix": prefix,
+                "start_date": new Date(),
+                "total_secs": minutes * 60,
+                "remaining_sec": minutes * 60,
+                "active": false
+            }
+            var entry_updated = false;
+            let obj = timers.find((o, i) => {
+                if (o.prefix === prefix) {
+                    timers[i] = { prefix: prefix, start_date: new Date(),total_secs: minutes * 60, remaining_sec:  minutes * 60 };
+                    entry_updated = true;
+                    return true; // stop searching
+                }
+            });
+            if (entry_updated == false) {
+                timers.push(timer_entry);
+            }
+            remaining_total_update();
+        }
+
+
+        function remaining_total_update() {
+            var rows = document.getElementById('timers_table').getElementsByTagName('tbody')[0].children;
+            var total = 0;
+            for (let index = 0; index < rows.length; index++) {
+                const element = rows[index];
+                tr_id = element.id
+                const prefix = tr_id.split('_tr')[0]
+                var time_input_id = prefix + "_time_input";
+                cur_min = document.getElementById(time_input_id).value;
+                value = parseInt(cur_min);
+                if (! isNaN(value)) {
+                    total += value;
+                }
+            }
+            document.getElementById('minutes_total').innerHTML = total;
+        }
+
+
+        function seconds_to_time(secs) {
+            var seconds = secs;
+            var minutes = Math.floor(secs / 60);
+            var hours = Math.floor(minutes / 60);
+
+            var seconds_left = 0;
+            var minutes_left = 0;
+            var hours_left = 0;
+            
+            if ( hours > 0 ) {
+                hours_left = hours;
+                minutes_left = minutes - (hours * 60);
+                seconds_left = seconds - (minutes_left * 60);
+            }
+
+            if ( hours < 1 ) {
+                minutes_left = minutes
+                seconds_left = seconds - (minutes_left * 60);
+            }
+
+
+            if (seconds_left < 10) {
+                seconds_left = "0" + seconds_left;
+            }
+
+            if (minutes_left < 10) {
+                minutes_left = "0" + minutes_left;
+            }
+
+            return hours_left + ":" + minutes_left + ":" + seconds_left;
+        }
+
+
+        function timer_table_tr_add(name_prefix="timer") {
+            // table
+            var timer_table_body = document.getElementById('timers_table').getElementsByTagName('tbody')[0];
+
+            tr_count = timer_table_body.childNodes.length;
+
+            name = name_prefix + "_" + ( tr_count );
+
+            // tr
+            var new_row = timer_table_body.insertRow()
+            new_row.id = name + "_tr";
+
+            // time td
+            var new_time_td = new_row.insertCell();
+            new_time_td.id = name + "_time_td";
+            new_time_td.className = "time_input_td";
+
+            // time input
+            var new_time_input = document.createElement('input');
+            new_time_input.id = name + "_time_input";
+            new_time_input.className = "time_input";
+            new_time_input.onchange =  function(){ remaining_update(new_time_input.id); };
+
+            new_time_td.appendChild(new_time_input);
+
+            // remaining td
+            var new_remaining_td = new_row.insertCell();
+            new_remaining_td.id = name + "_remaining_td";
+            new_remaining_td.className = "remaining_td";
+
+            // remaining display span
+            var new_remaining_span = document.createElement('span');
+            new_remaining_span.id = name + "_remaining_span";
+            new_remaining_span.type = "hidden";
+
+            new_remaining_td.appendChild(new_remaining_span);
+
+            // remaining hidden input
+            var new_remaining_input = document.createElement('input');
+            new_remaining_input.id = name + "_remaining_input";
+            new_remaining_input.type = "hidden";
+
+            new_remaining_td.appendChild(new_remaining_input);
+
+            // start td
+            var new_start_td = new_row.insertCell();
+            new_start_td.id = name + "_start_td";
+
+            // start button
+            var new_start_button = document.createElement('button');
+            new_start_button.id = name + "_start_button";
+            new_start_button.innerHTML = "Start";
+            new_start_button.onclick = function() { timer_start(new_start_button.id); };
+
+            new_start_td.appendChild(new_start_button);
+
+            // stop td
+            var new_stop_td = new_row.insertCell();
+            new_stop_td.id = name + "_stop_td";
+
+            // stop button
+            var new_stop_button = document.createElement('button');
+            new_stop_button.id = name + "_stop_button";
+            new_stop_button.innerHTML = "Stop";
+            new_stop_button.onclick = function() { timer_stop(new_stop_button.id); };
+
+            new_stop_td.appendChild(new_stop_button);
+
+            // trigger next tickbox tr
+            var new_trigger_td = new_row.insertCell();
+            new_trigger_td.id = name + "_trigger_td";
+
+            // trigger next tickbox
+            var new_trigger_input = document.createElement('input');
+            new_trigger_input.id = name + "_trigger_checkbox";
+            new_trigger_input.type = "checkbox";
+
+            new_trigger_td.appendChild(new_trigger_input);
+
+        }
+
+
+        function timer_start(start_button_id) {
+            const prefix = start_button_id.split('_start_button')[0];
+            let obj = timers.find((o, i) => {
+                if (o.prefix === prefix) {
+                    timers[i]['active'] = true;
+                    timers[i]['start_date'] = new Date();
+                    return true;
+                }
+            });
+            remaining_countdown(start_button_id);
+        }
+
+
+        function timer_stop(stop_button_id) {
+            const prefix = stop_button_id.split('_stop_button')[0];
+            let obj = timers.find((o, i) => {
+                if (o.prefix === prefix) {
+                    timers[i]['active'] = false;
+                    timers[i]['remaining_sec'] = timers[i]['total_secs'];
+                    return true;
+                }
+            });
+        }
+
+
+        timer_table_tr_add();
     </script>
 </body>
 
