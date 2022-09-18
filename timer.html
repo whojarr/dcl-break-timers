@@ -24,12 +24,13 @@
             border: 1px;
             border-style: solid;
             height: 100px;
+            overflow-y: scroll;
         }
         .message_input {
-            width: 50%;
+            width: 400px;
         }
         .time_input {
-            width: 30px;
+            width: 40px;
         }
         .time_input_td {
             text-align: right
@@ -112,6 +113,7 @@
             messages = document.getElementById('messages');
             date = new Date().toLocaleString();
             messages.innerHTML += "<i>" + date + "</i>: <span>" + msg + '</span><br/>';
+            messages.scrollTop = messages.scrollHeight;
         }
 
 
@@ -191,7 +193,7 @@
             var minutes = document.getElementById(time_input_id).value;
             var remaining_span_id = time_input_id.replace('time_input', 'remaining_span');
             var remaining_input_id = time_input_id.replace('time_input', 'remaining_input');
-            document.getElementById(remaining_span_id).innerHTML = minutes_to_time(minutes);
+            document.getElementById(remaining_span_id).innerHTML = seconds_to_time(minutes * 60);
             document.getElementById(remaining_input_id).value = minutes * 60;
             var timer_entry = {
                 "prefix": prefix,
@@ -245,7 +247,7 @@
             if ( hours > 0 ) {
                 hours_left = hours;
                 minutes_left = minutes - (hours * 60);
-                seconds_left = seconds - (minutes_left * 60);
+                seconds_left = seconds - (minutes_left * 60) - ((hours_left * 60) * 60) ;
             }
 
             if ( hours < 1 ) {
@@ -288,6 +290,10 @@
             new_time_input.id = name + "_time_input";
             new_time_input.className = "time_input";
             new_time_input.onchange =  function(){ remaining_update(new_time_input.id); };
+            new_time_input.type = 'number';
+            new_time_input.pattern = "[0-9]+";
+            new_time_input.max = "59";
+            new_time_input.min = "0";
 
             new_time_td.appendChild(new_time_input);
 
