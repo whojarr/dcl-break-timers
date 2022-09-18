@@ -12,6 +12,22 @@
             font-family: "Open Sans",sans-serif;
             padding: 10%;
         }
+        #current_time {
+            padding-top: 10px;
+            padding-bottom: 20px;
+        }
+        #messages {
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 5px;
+            padding-right: 15px;
+            border: 1px;
+            border-style: solid;
+            height: 100px;
+        }
+        .message_input {
+            width: 50%;
+        }
         .time_input {
             width: 30px;
         }
@@ -26,6 +42,8 @@
 
     <h1>Timers</h1>
 
+    <div id="current_time"></div>
+
     <div id="timers">
         <table id="timers_table">
             <thead>
@@ -35,6 +53,7 @@
                     <td>Start</td>
                     <td>Stop</td>
                     <td>Trigger next</td>
+                    <td>Trigger Message</td>
                 </tr>
             </thead>
             <tbody>
@@ -47,15 +66,30 @@
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
                 </tr>
             </tfoot>
         </table>
         <button onclick="timer_table_tr_add()">Add</button>
     </div>
 
+    <br/>
+    <br/>
+
+    <div id="messages_div">
+        <label>Messages</label>
+        <div id="messages"></div>
+    </div>
+
     <script>
 
         var timers = [];
+
+        function current_time_autoupdate() {
+            document.getElementById('current_time').innerHTML = new Date().toLocaleTimeString();
+            setTimeout(function () { current_time_autoupdate(); }, 1000);
+
+        }
 
         function minutes_to_time(mins) {
             var minutes = mins;
@@ -72,6 +106,13 @@
 
             return hours + ":" + display_minutes;
         };
+
+
+        function message_display(msg) {
+            messages = document.getElementById('messages');
+            date = new Date().toLocaleString();
+            messages.innerHTML += "<i>" + date + "</i>: <span>" + msg + '</span><br/>';
+        }
 
 
         function remaining_countdown(start_input_id) {
@@ -101,7 +142,11 @@
                         if (timers[next_timer_index] !== undefined) {
                             next_timer_prefix = 'timer_' +  next_timer_id_index;
                         }
-                        
+                        // check for messages to display
+                        msg = document.getElementById(prefix + '_message').value;
+                        if (msg !== '') {
+                            message_display(msg);
+                        }
                     }
                     return true;
                 }
@@ -289,7 +334,7 @@
 
             new_stop_td.appendChild(new_stop_button);
 
-            // trigger next tickbox tr
+            // trigger next tickbox td
             var new_trigger_td = new_row.insertCell();
             new_trigger_td.id = name + "_trigger_td";
 
@@ -299,6 +344,18 @@
             new_trigger_input.type = "checkbox";
 
             new_trigger_td.appendChild(new_trigger_input);
+
+            // completion message td
+            var new_message_td = new_row.insertCell();
+            new_message_td.id = name + "_message_td";
+
+            // completion message text box
+            var new_message_input = document.createElement('input');
+            new_message_input.id = name + "_message";
+            new_message_input.type = "text";
+            new_message_input.className = 'message_input';
+
+            new_message_td.appendChild(new_message_input);
 
         }
 
@@ -327,7 +384,7 @@
             });
         }
 
-
+        current_time_autoupdate();
         timer_table_tr_add();
     </script>
 </body>
