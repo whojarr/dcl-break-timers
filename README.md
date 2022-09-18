@@ -46,6 +46,20 @@ this can be run local, upstream or the body of the html document pasted anywhere
 * The settings can be shared via the "Share URL" which coverts the local start stop time to the local time of the user opening it.
 
 
+# Timers
+
+[timer.html](timer.html)
+
+## Features
+
+* Minutes to countdown.
+
+* Add as many timers as you want.
+
+* Start Stop Timers Indiviually or Trigger from previous timer completion
+
+
+
 ## basic use
 
 [Online](https://whojarr.github.io/dcl-break-timers/index.html)
