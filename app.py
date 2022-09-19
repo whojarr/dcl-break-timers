@@ -1,6 +1,9 @@
 import os
+from urllib import response
 from flask import Flask
 from flask import render_template
+from pyzoom import ZoomClient
+
 
 template_dir = os.path.abspath('./')
 app = Flask(__name__, template_folder=template_dir)
@@ -25,6 +28,15 @@ def dates_html():
 @app.route("/timer.html")
 def timer_html():
     return render_template("timer.html", **locals())
+
+
+def zoom_me():
+
+    zoom_client = ZoomClient('SI6hJxlaTYeUlbUcFmwu9Q', 'QmLnnClzUZ6vRmKcmgi3Alznd7w6x8Od')
+    response = zoom_client.meetings.list_meetings()
+    print(response)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, ssl_context='adhoc')

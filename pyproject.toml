@@ -8,6 +8,7 @@ authors = ["David Hunter <dhunter@digitalcreation.co.nz>"]
 python = "^3.8"
 Flask = "^2.2.2"
 pyOpenSSL = "^22.0.0"
+pyzoom = "^0.1.15"
 
 [tool.poetry.dev-dependencies]
 markdown2 = "^2.4.3"

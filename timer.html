@@ -294,6 +294,11 @@
             new_time_input.pattern = "[0-9]+";
             new_time_input.max = "59";
             new_time_input.min = "0";
+            new_time_input.addEventListener("keyup", function(event) {
+                if (event.key === "Enter") {
+                    timer_table_tr_add();
+                }
+            });
 
             new_time_td.appendChild(new_time_input);
 
@@ -362,6 +367,8 @@
             new_message_input.className = 'message_input';
 
             new_message_td.appendChild(new_message_input);
+
+            document.getElementById(name + "_time_input").focus();
 
         }
 
