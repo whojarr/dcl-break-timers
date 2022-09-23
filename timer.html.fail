@@ -10,7 +10,8 @@
     <style>
         body {
             font-family: "Open Sans",sans-serif;
-            padding: 10%;
+            padding: 3%;
+            padding-right: 20%;
         }
         #current_time {
             padding-top: 10px;
@@ -35,6 +36,15 @@
         .time_input_td {
             text-align: right
         }
+        #timers_table {
+            background-color: rgb(178, 220, 255);
+        }
+        #timers_table tbody tr:nth-child(odd) {
+            background-color: rgba(214, 216, 255, 0.773);
+        }
+        #timers_table tbody tr:nth-child(even) {
+            background-color: rgba(233, 234, 255, 0.773);
+        }
         .remaining_td {
             text-align: right
         }
@@ -55,6 +65,7 @@
                     <td>Stop</td>
                     <td>Trigger next</td>
                     <td>Trigger Message</td>
+                    <td></td>
                 </tr>
             </thead>
             <tbody>
@@ -63,6 +74,7 @@
             <tfoot>
                 <tr>
                     <td id="minutes_total" class="time_input_td"></td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -77,6 +89,8 @@
     <br/>
     <br/>
 
+    <lable>Send Messages Early (Seconds)</lable>
+    <input id="trigger_pre_warning" type="number" min="0" value="10" size="3"/>
     <div id="messages_div">
         <label>Messages</label>
         <div id="messages"></div>
@@ -90,6 +104,13 @@
             document.getElementById('current_time').innerHTML = new Date().toLocaleTimeString();
             setTimeout(function () { current_time_autoupdate(); }, 1000);
 
+        }
+
+        function isNode(o){
+            return (
+                typeof Node === "object" ? o instanceof Node : 
+                o && typeof o === "object" && typeof o.nodeType === "number" && typeof o.nodeName==="string"
+            );
         }
 
         function minutes_to_time(mins) {
@@ -111,8 +132,18 @@
 
         function message_display(msg) {
             messages = document.getElementById('messages');
-            date = new Date().toLocaleString();
-            messages.innerHTML += "<i>" + date + "</i>: <span>" + msg + '</span><br/>';
+            offset_seconds = document.getElementById('trigger_pre_warning').value;
+            console.log(offset_seconds);
+            if (offset_seconds !== 0) {
+                var now = new Date();
+                var newdate = new Date(now.getTime() + offset_seconds*1000);
+                var date = newdate.toLocaleString();
+                messages.innerHTML += "@<i>" + date + "</i>: <span>" + msg + '</span><br/>';
+            }
+            else {
+                date = new Date().toLocaleString();
+                messages.innerHTML += "<i>" + date + "</i>: <span>" + msg + '</span><br/>';
+            }
             messages.scrollTop = messages.scrollHeight;
         }
 
@@ -136,14 +167,13 @@
                     remaining_sec = total - diff;
                     timers[i]['remaining_sec'] = remaining_sec;
                     if (remaining_sec < 1) {
-                        active = false;
-                        timers[i]['active'] = active;
-                        timer_index = prefix.replace('timer_', '');
-                        next_timer_index = parseInt(timer_index);
-                        next_timer_id_index = parseInt(timer_index) + 1;
-                        if (timers[next_timer_index] !== undefined) {
-                            next_timer_prefix = 'timer_' +  next_timer_id_index;
+                        timers[i]['active'] = false;
+                        if ( timers[i + 1 ] ) {
+                            next_timer_prefix = timers[i + 1]['prefix'];
                         }
+                    }
+                    offset_seconds = document.getElementById('trigger_pre_warning').value;
+                    if (remaining_sec == offset_seconds) {
                         // check for messages to display
                         msg = document.getElementById(prefix + '_message').value;
                         if (msg !== '') {
@@ -172,7 +202,10 @@
                 var remaining = timers[i]['remaining_sec']
                 var time = seconds_to_time(remaining);
                 var remaining_id = timers[i]['prefix'] + "_remaining_span";
-                document.getElementById(remaining_id).innerHTML = time;
+                remaining_elem = document.getElementById(remaining_id)
+                if (isNode(remaining_elem)) {
+                    remaining_elem.innerHTML = time;
+                }
             });
         }
 
@@ -294,7 +327,7 @@
             new_time_input.pattern = "[0-9]+";
             new_time_input.max = "59";
             new_time_input.min = "0";
-            new_time_input.addEventListener("keydown", function(event) {
+            new_time_input.addEventListener("keyup", function(event) {
                 if (event.key === "Enter") {
                     timer_table_tr_add();
                 }
@@ -353,7 +386,6 @@
             var new_trigger_input = document.createElement('input');
             new_trigger_input.id = name + "_trigger_checkbox";
             new_trigger_input.type = "checkbox";
-            new_trigger_input.checked = true;
 
             new_trigger_td.appendChild(new_trigger_input);
 
@@ -369,8 +401,38 @@
 
             new_message_td.appendChild(new_message_input);
 
+            // delete button td
+            var new_delete_td = new_row.insertCell();
+            new_delete_td.id = name + "_delete_td";
+            // delete button
+            var new_delete_button = document.createElement('button');
+            new_delete_button.id = name + "_delete";
+            new_delete_button.innerHTML = "Delete";
+            new_delete_button.onclick = function() { timer_table_tr_delete(new_delete_button.id); };
+            
+            new_delete_td.appendChild(new_delete_button);
+
+
+
             document.getElementById(name + "_time_input").focus();
 
+
+        }
+
+
+        function timer_table_tr_delete(elementId="timer") {
+            const prefix = elementId.split('_delete')[0];
+            const tr_id = prefix + "_tr";
+
+            let obj = timers.find((o, i) => {
+                if (o.prefix === prefix) {
+                    timers.splice(i, 1);
+                    return true;
+                }
+            });
+
+            var index = document.getElementById(tr_id).rowIndex;
+            document.getElementById("timers_table").deleteRow(index);
         }
 
 
