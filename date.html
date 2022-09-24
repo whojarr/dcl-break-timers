@@ -803,8 +803,14 @@
                     }
                     var remaining_time_sec = remaining_time['sec'];
                     var time_display = "";
+                    var time_display_prefix = "Duration: ";
+                    var time_display_suffix = "hrs";
+                    if (remaining_time['start_original'] < new Date()) {
+                        time_display_prefix = "Remaining: "
+                        time_display_suffix = ":" + remaining_time_sec;
+                    }
                     if ((remaining_time_hr + remaining_time_min) > 0) {
-                        time_display = "Duration: " + remaining_time_hr + ":" + remaining_time_min + "hrs";
+                        time_display = time_display_prefix + remaining_time_hr + ":" + remaining_time_min + time_display_suffix;
                         document.getElementById(this.remaining_element_id).innerHTML = time_display;
                         document.getElementById('main_remaining').innerHTML = time_display;
                     }
