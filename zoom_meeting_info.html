@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+</head>
+
+<body>
+
+    <style>
+        body {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        h1 {
+            margin-top: 0px;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        lable {
+            font-weight: bold;
+        }
+
+        #main {
+            font-family: "Open Sans",sans-serif;
+            width: 100%;
+            /* background-color: rgb(214, 214, 255); */
+            height:100vh;
+            vertical-align: top;
+        }
+
+        .breakout_room_heading {
+            background-color: rgb(214, 214, 255);
+        }
+
+        .meetings {
+            display: block;
+            margin-left: auto;
+            margin-right: auto 
+        }
+
+        .meeting_table {
+            font-size: 0.8em;
+            text-align: center;
+            border: 1px solid rgb(214, 214, 255);
+            border-collapse: collapse;
+            width: 90%;
+            margin-top: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: rgb(253, 253, 255);
+        }
+
+        .meeting_table thead {
+            background-color: rgb(214, 214, 255);
+            border: 1px solid rgb(214, 214, 255);
+            border-collapse: collapse;
+        }
+
+        .meeting_table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .meeting_table td {
+            border: 1px solid rgb(214, 214, 255);
+            border-collapse: collapse;
+            padding: 8px 15px 8px 15px;
+        }
+
+        .meeting_status {
+           text-align: center;
+        }
+
+        .meeting_status_input {
+           margin-left: 10px;
+        }
+
+        #breakout_rooms {
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 15px;
+            display: inline-block;
+            vertical-align: top;
+            /* height: 100vh; */
+            margin-top: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid rgb(214, 214, 255);
+        }
+
+        #header {
+            text-align: center;
+        }
+
+        #info {
+            margin: 15px;
+            display: inline-block;
+            height: 80vh;
+            border: 1px solid rgb(214, 214, 255);
+        }
+
+        #settings_table {
+            font-size: 0.7em;
+            margin: 30px;
+        }
+
+        #settings_table td {
+            padding: 5px 15px 5px 15px;
+        }
+
+        #spacer {
+            margin: 5px;
+        }
+
+    </style>
+
+    <div id="main">
+
+        <div class="spacer">&nbsp;</div>
+        <div id="header">
+
+            <h1>Zoom Meeting Info</h1>
+
+            <input type="button" onclick="section_show_toggle('info')" value="Info"/>
+            <input type="button" onclick="section_show_toggle('breakout_rooms')" value="Configured Breakout Rooms"/>
+            <input type="button" onclick="section_show_toggle(element_id)" value="Other"/>
+
+        </div>
+
+
+        <div id="info">
+
+
+            <h2>topic</h2>
+
+            <table id="meeting_table" class="meeting_table">
+                <tbody>
+                    <tr>
+                        <td>Host Email</td>
+                        <td id="host_email"></td>
+                    </tr>
+                    <tr>
+                        <td>ID</td>
+                        <td id="id"></td>
+                        <td>Password</td>
+                        <td id="password"></td>
+                    </tr>
+                    <tr>
+                        <td>Status</td>
+                        <td id="status"></td>
+                        <td>Join Url</td>
+                        <td id="join_url"></td>
+                    </tr>
+                    <tr>
+                        <td>Timezone</td>
+                        <td id="timezone"></td>
+                        <td>Start Url</td>
+                        <td id="start_url"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div id="settings">
+        
+                <h2>Settings</h2>
+        
+                <table id="settings_table" class="meeting_table">
+                    <tbody>
+                        <tr>
+                            <td>allow_multiple_devices</td>
+                            <td id="allow_multiple_devices"></td>
+                            <td>alternative_hosts</td>
+                            <td id="alternative_hosts"></td>
+                        </tr>
+                        <tr>
+                            <td>audio</td>
+                            <td id="audio"></td>
+                            <td>auto_recording</td>
+                            <td id="auto_recording"></td>
+                        </tr>
+                        <tr>
+                            <td>close_registration</td>
+                            <td id="close_registration"></td>
+                            <td>email_notification</td>
+                            <td id="email_notification"></td>
+                        </tr>
+                        <tr>
+                            <td>enforce_login</td>
+                            <td id="enforce_login"></td>
+                            <td>enforce_login_domains</td>
+                            <td id="enforce_login_domains"></td>
+                        </tr>
+                        <tr>
+                            <td>focus_mode</td>
+                            <td id="focus_mode"></td>
+                            <td>host_save_video_order</td>
+                            <td id="host_save_video_order"></td>
+                        </tr>
+                        <tr>
+                            <td>host_video</td>
+                            <td id="host_video"></td>
+                            <td>in_meeting</td>
+                            <td id="in_meeting"></td>
+                        </tr>
+                        <tr>
+                            <td>join_before_host</td>
+                            <td id="join_before_host"></td>
+                            <td>meeting_authentication</td>
+                            <td id="meeting_authentication"></td>
+                        </tr>
+                        <tr>
+                            <td>mute_upon_entry</td>
+                            <td id="mute_upon_entry"></td>
+                            <td>participant_video</td>
+                            <td id="participant_video"></td>
+                        </tr>
+                        <tr>
+                            <td>private_meeting</td>
+                            <td id="private_meeting"></td>
+                            <td>registrants_confirmation_email</td>
+                            <td id="registrants_confirmation_email"></td>
+                        </tr>
+                        <tr>
+                            <td>registrants_email_notification</td>
+                            <td id="registrants_email_notification"></td>
+                            <td>request_permission_to_unmute_participants</td>
+                            <td id="request_permission_to_unmute_participants"></td>
+                        </tr>
+                        <tr>
+                            <td>show_share_button</td>
+                            <td id="show_share_button"></td>
+                            <td>use_pmi</td>
+                            <td id="use_pmi"></td>
+                        </tr>
+                        <tr>
+                            <td>waiting_room</td>
+                            <td id="waiting_room"></td>
+                            <td>watermark</td>
+                            <td id="watermark"></td>
+                        </tr>
+                        <tr>
+                            <td>breakout rooms enable</td>
+                            <td id="enable"></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+        <div id="breakout_rooms">
+
+            <h2>Breakout Rooms</h2>
+    
+            <table id="breakout_rooms_table" class="meeting_table">
+            </table>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        function section_show_toggle(element_id) {
+
+            let thing = document.getElementById(element_id);
+            if (window.getComputedStyle(thing).display == 'none') {
+                document.getElementById(element_id).style.display = 'inline-block';
+            } else {
+                document.getElementById(element_id).style.display = 'none';
+            }
+
+        }
+
+        var meeting = {};
+
+        function url_query() {
+
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            const params = Object.fromEntries(urlSearchParams.entries());
+
+            return params;
+        }
+
+
+        function meeting_display(meeting) {
+
+            console.log(meeting);
+
+            document.getElementById('host_email').innerHTML = meeting['host_email'];
+            document.getElementById('id').innerHTML = meeting['id'];
+            document.getElementById('password').innerHTML = meeting['password'];
+
+            var start_a = document.createElement('a');
+            start_a.id = "start_url_a";
+            start_a.href = meeting['start_url'];
+            start_a.innerHTML = 'Start';
+            document.getElementById('start_url').appendChild(start_a);
+
+            var join_a = document.createElement('a');
+            join_a.id = "start_url_a";
+            join_a.href = meeting['start_url'];
+            join_a.innerHTML = 'Join';
+            document.getElementById('join_url').appendChild(join_a);
+
+            document.getElementById('status').innerHTML = meeting['status'];
+            document.getElementById('timezone').innerHTML = meeting['timezone'];
+
+            settings = meeting['settings'];
+            id_update('allow_multiple_devices', settings);
+            id_update('alternative_hosts', settings);
+            id_update('audio', settings);
+            id_update('auto_recording', settings);
+            id_update('close_registration', settings);
+            id_update('email_notification', settings);
+            id_update('enforce_login', settings) ;
+            id_update('enforce_login_domains', settings);
+            id_update('focus_mode', settings);
+            id_update('host_save_video_order', settings);
+            id_update('host_video', settings);
+            id_update('in_meeting', settings);
+            id_update('join_before_host', settings);
+            id_update('meeting_authentication', settings);
+            id_update('mute_upon_entry', settings);
+            id_update('participant_video', settings);
+            id_update('private_meeting', settings);
+            id_update('registrants_confirmation_email', settings);
+            id_update('registrants_email_notification', settings);
+            id_update('request_permission_to_unmute_participants', settings);
+            id_update('show_share_button', settings);
+            id_update('use_pmi', settings);
+            id_update('waiting_room', settings);
+            id_update('watermark', settings);
+
+
+            breakout_room = meeting['settings']['breakout_room'];
+            id_update('enable', breakout_room);
+
+            breakout_rooms = meeting['settings']['breakout_room']['rooms'];
+            var breakout_rooms_table = document.getElementById('breakout_rooms_table');
+
+            for (let index = 0; index < breakout_rooms.length; ++index) {
+
+                // heading tr
+                var heading_tr = document.createElement('tr');
+                var heading_td = document.createElement('td');
+                heading_td.colSpan = 2;
+                heading_td.innerHTML = breakout_rooms[index]['name']
+                heading_td.className = 'breakout_room_heading';
+
+                heading_tr.appendChild(heading_td);
+                breakout_rooms_table.appendChild(heading_tr);
+
+                // rooms tr's
+                var participants = breakout_rooms[index]['participants']
+                for (let pindex = 0; pindex < participants.length; ++pindex) {
+
+                    var participant_tr = document.createElement('tr');
+                    var participant_td = document.createElement('td');
+                    participant_td.colSpan = 2;
+                    participant_td.innerHTML = breakout_rooms[index]['participants'][pindex]
+
+                    participant_tr.appendChild(participant_td);
+
+                    breakout_rooms_table.appendChild(participant_tr);
+
+                }
+            };
+
+        }
+
+
+        function meeting_update() {
+            let xhr = new XMLHttpRequest();
+
+            xhr.onreadystatechange = function() {
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    // console.log(this.responseText);
+                    meeting = JSON.parse(this.responseText);
+                    meeting_display(meeting);
+                }
+            }
+
+            meeting_id = url_query()['meeting_id'];
+            console.log(meeting_id)
+            xhr.open("GET", "/api/zoom/meeting?meeting_id=" + meeting_id);
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.send(null);
+
+        }
+
+
+        function id_update(id, record) {
+            document.getElementById(id).innerHTML = record[id];
+        }
+
+
+        meeting_update();
+    </script>
+
+</body>
+
+</html>

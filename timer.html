@@ -77,6 +77,12 @@
     <br/>
     <br/>
 
+    <label>Enable Zoom Chat (requires app running)</label>
+    <input id="zoom_enabled" type="checkbox"/>
+
+    <br/>
+    <br/>
+
     <div id="messages_div">
         <label>Messages</label>
         <div id="messages"></div>
@@ -117,6 +123,24 @@
         }
 
 
+        function message_send(msg) {
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/chat/send");
+
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onload = () => console.log(xhr.responseText);
+
+            let data = {
+                "message": "timer: " + msg,
+            };
+
+            xhr.send(JSON.stringify(data));
+
+        }
+
+
         function remaining_countdown(start_input_id) {
             const prefix = start_input_id.split('_start_button')[0];
             var remaining_input_id = prefix + "_remaining_input";
@@ -126,6 +150,7 @@
             var diff = 0;
             var remaining_sec = 0;
             var active = false;
+            var zoom_enabled = document.getElementById('zoom_enabled');
             let obj = timers.find((o, i) => {
                 if (o.prefix === prefix) {
                     start_date = timers[i]['start_date'];
@@ -148,6 +173,9 @@
                         msg = document.getElementById(prefix + '_message').value;
                         if (msg !== '') {
                             message_display(msg);
+                            if (zoom_enabled.checked) {
+                                message_send(msg);
+                            }
                         }
                     }
                     return true;

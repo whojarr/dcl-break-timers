@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+</head>
+
+<body>
+
+    <style>
+
+        h1 {
+            text-align: center;
+        }
+
+        lable {
+            font-weight: bold;
+        }
+
+        #main {
+            font-family: "Open Sans",sans-serif;
+        }
+
+        #meetings {
+            display: block;
+            margin-left: auto;
+            margin-right: auto 
+        }
+
+        #meetings_table {
+            text-align: center;
+            border: 1px solid rgb(214, 214, 255);
+            border-collapse: collapse;
+            width: 90%;
+            margin-top: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: rgb(253, 253, 255);
+        }
+
+        #meetings_table thead {
+            background-color: rgb(214, 214, 255);
+            border: 1px solid rgb(214, 214, 255);
+            border-collapse: collapse;
+        }
+
+        #meetings_table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #meetings_table td {
+            border: 1px solid rgb(214, 214, 255);
+            border-collapse: collapse;
+            padding: 10px 15px 10px 15px;
+        }
+
+        .meeting_status {
+           text-align: center;
+        }
+
+        .meeting_status_input {
+           margin-left: 10px;
+        }
+
+    </style>
+
+    <div id="main">
+
+        <h1>Zoom Meetings</h1>
+
+        <div id="meetings">
+
+            <div class="meeting_status">
+                <lable>Status</lable>
+                <input name="meeting_list_status" class="meeting_status_input" type="radio" onchange="meeting_list_update(this.value);" value="">Default (Live)</input>
+                <input name="meeting_list_status" class="meeting_status_input" type="radio" onchange="meeting_list_update(this.value);" value="upcoming">Upcoming (Includes Live)</input>
+                <input name="meeting_list_status" class="meeting_status_input" type="radio" onchange="meeting_list_update(this.value);" value="scheduled">scheduled</input>
+                <input name="meeting_list_status" class="meeting_status_input" type="radio" onchange="meeting_list_update(this.value);" value="upcoming_meetings">Upcoming_meetings</input>
+                <input name="meeting_list_status" class="meeting_status_input" type="radio" onchange="meeting_list_update(this.value);" value="previous_meetings">Previous_meetings</input>
+            </div>
+
+            <table id="meetings_table">
+                <thead>
+                    <tr>
+                        <td>Topic</td>
+                        <td>Start</td>
+                        <td>Timezone</td>
+                        <td>Duration</td>
+                        <td>URL</td>
+                        <td>@</td>
+                    </tr>
+                </thead>
+                <tbody id="meetings_table_body">
+
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        var meetings = {}
+
+        function meeting_list_update(meeting_type="") {
+            let xhr = new XMLHttpRequest();
+
+            xhr.onreadystatechange = function() {
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    meetings = JSON.parse(this.responseText);
+                    meeting_list_display(meetings);
+                }
+            }
+
+            xhr.open("GET", "/api/zoom/meetings?type=" + meeting_type);
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.send(null);
+
+        }
+
+
+        function meeting_list_display(meetings) {
+            console.log(meetings);
+            records = meetings['meetings']
+            table = document.getElementById('meetings_table_body');
+            table.intypenerHTML = ""
+
+            let obj = records.find((meeting, i) => {
+
+                var meeting_list_tr = document.createElement('tr');
+                meeting_list_tr.id = 'tr_' + i;
+
+                var topic_td = document.createElement('td');
+                topic_td.id = 'topic_' + i;
+                topic_td.innerHTML = meeting['topic'];
+                meeting_list_tr.appendChild(topic_td);
+
+                var start_td = document.createElement('td');
+                start_td.id = 'start_' + i;
+                start_td.innerHTML = meeting_time_string(meeting['start_time']);
+                meeting_list_tr.appendChild(start_td);
+
+                var timezone_td = document.createElement('td');
+                timezone_td.id = 'timezone_' + i;
+                timezone_td.innerHTML = meeting['timezone'];
+                meeting_list_tr.appendChild(timezone_td);
+
+                var duration_td = document.createElement('td');
+                duration_td.id = 'duration_' + i;
+                duration_td.innerHTML = meeting['duration'];
+                meeting_list_tr.appendChild(duration_td);
+
+                var join_url_td = document.createElement('td');
+                join_url_td.id = 'url_' + i;
+
+                var join_link = document.createElement('a');
+                join_link.href = meeting['join_url']
+                join_link.innerText = "Join Link"
+                join_link.target= '_blank';
+                join_url_td.appendChild(join_link);
+
+                meeting_list_tr.appendChild(join_url_td);
+
+                var info_td = document.createElement('td');
+                info_td.id = 'info' + i;
+
+                var info_button = document.createElement('a');
+                info_button.href = '/zoom_meeting_info.html?meeting_id=' + meeting['id'];
+                info_button.innerText = "Details";
+                info_button.className = 'info_button';
+                info_td.appendChild(info_button);
+
+                meeting_list_tr.appendChild(info_td);
+
+
+                table.appendChild(meeting_list_tr);
+
+            });
+
+        };
+
+
+        function meeting_time_string(date) {
+            date = new Date(date);
+            return date.toLocaleString()
+        }
+
+        let types = document.getElementsByName('meeting_list_status');
+        types.forEach((type) => {
+            if (type.checked) {
+                meeting_list_update(type.value);
+            }
+        });
+
+
+    </script>
+
+</body>
+
+</html>
