@@ -92,6 +92,19 @@
             border: 1px solid rgb(214, 214, 255);
         }
 
+        #chat {
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 15px;
+            display: inline-block;
+            vertical-align: top;
+            /* height: 100vh; */
+            margin-top: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid rgb(214, 214, 255);
+        }
+
         #header {
             text-align: center;
         }
@@ -127,7 +140,7 @@
 
             <input type="button" onclick="section_show_toggle('info')" value="Info"/>
             <input type="button" onclick="section_show_toggle('breakout_rooms')" value="Configured Breakout Rooms"/>
-            <input type="button" onclick="section_show_toggle(element_id)" value="Other"/>
+            <input type="button" onclick="section_show_toggle('chat')" value="Chat"/>
 
         </div>
 
@@ -261,6 +274,15 @@
             <h2>Breakout Rooms</h2>
     
             <table id="breakout_rooms_table" class="meeting_table">
+            </table>
+
+        </div>
+
+        <div id="chat">
+
+            <h2>Chat</h2>
+    
+            <table id="chat_table" class="meeting_table">
             </table>
 
         </div>
