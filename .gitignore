@@ -6,3 +6,4 @@ node_modules
 yarn.lock
 
 auth_token.tmp
+zoom_test2.py
