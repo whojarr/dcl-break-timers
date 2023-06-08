@@ -116,6 +116,19 @@
             border: 1px solid rgb(214, 214, 255);
         }
 
+        #participants {
+            padding-left: 15px;
+            padding-right: 15px;
+            padding-bottom: 15px;
+            display: inline-block;
+            vertical-align: top;
+            /* height: 100vh; */
+            margin-top: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid rgb(214, 214, 255);
+        }
+
         #settings_table {
             font-size: 0.7em;
             margin: 30px;
@@ -138,9 +151,10 @@
 
             <h1>Zoom Meeting Info</h1>
 
-            <input type="button" onclick="section_show_toggle('info')" value="Info"/>
-            <input type="button" onclick="section_show_toggle('breakout_rooms')" value="Configured Breakout Rooms"/>
+            <input type="button" onclick="section_show_toggle('info')" value="Info/Settings"/>
+            <input type="button" onclick="section_show_toggle('breakout_rooms')" value="Breakout Rooms"/>
             <input type="button" onclick="section_show_toggle('chat')" value="Chat"/>
+            <input type="button" onclick="section_show_toggle('participants')" value="Participants"/>
 
         </div>
 
@@ -287,6 +301,15 @@
 
         </div>
 
+        <div id="participants">
+
+            <h2>Participants</h2>
+    
+            <table id="participants_table" class="meeting_table">
+            </table>
+
+        </div>
+
     </div>
 
     <script>
@@ -314,8 +337,6 @@
 
 
         function meeting_display(meeting) {
-
-            console.log(meeting);
 
             document.getElementById('host_email').innerHTML = meeting['host_email'];
             document.getElementById('id').innerHTML = meeting['id'];
@@ -422,12 +443,101 @@
         }
 
 
+
+        function participants_display(records) {
+
+            // console.log(records);
+            participants = records['Items'];
+            var participants_table = document.getElementById('participants_table');
+
+            // participant tr's
+            for (let index = 0; index < participants.length; ++index) {
+                
+                if (participants[index]['eveindexnt'] == 'meeting.participant_joined' || participants[index]['event'] == 'meeting.participant_left') {
+
+                    var participant_td = document.getElementById(participants[index]['participant_id']);
+
+                    // add tr if not present
+                    if (typeof(participant_td) == 'undefined' || participant_td == null) {
+
+                        var participant_tr = document.createElement('tr');
+                        participant_tr.id = participants[index]['participant_id'];
+
+                        var participant_td = document.createElement('td');
+                        participant_td.id = participants[index]['participant_id'] + '_td';
+                        participant_td.innerHTML = participants[index]['user_name'];
+
+                        var participant_updated_input = document.createElement('input');
+                        participant_updated_input.type = 'hidden';
+                        participant_updated_input.id = participants[index]['participant_id'] + '_updated';
+                        participant_updated_input.value = "2022-01-01T10:00:00Z";
+
+                        participant_td.appendChild(participant_updated_input);
+                        participant_tr.appendChild(participant_td);
+                        participants_table.appendChild(participant_tr);
+
+                    }
+
+                    var updated_date = document.getElementById(participants[index]['participant_id'] + '_updated').value;
+                    var updated_date_obj = new Date(updated_date);
+
+                    if (participants[index]['event'] == 'meeting.participant_joined') {
+                        var join_date = participants[index]['join_time'];
+                        var join_date_obj = new Date(join_date);
+                        if (join_date_obj > updated_date_obj) {
+                            
+                            document.getElementById(participants[index]['participant_id'] + '_updated').value = participants[index]['join_time'];
+                            document.getElementById(participants[index]['participant_id']).style.display = '';
+                        }
+                    }
+
+                    if (participants[index]['event'] == 'meeting.participant_left') {
+                        var left_date = participants[index]['leave_time'];
+                        var left_date_obj = new Date(left_date);
+                        if (left_date_obj > updated_date_obj) {
+                            document.getElementById(participants[index]['participant_id'] + '_updated').value = participants[index]['leave_time'];
+                            // document.getElementById(participants[index]['participant_id']).style.display = 'none';
+                        }
+                    }
+
+                    var updated_date = document.getElementById(participants[index]['participant_id'] + '_updated').value;
+
+                }
+
+            }
+        };
+
+
+        function participants_update() {
+            let xhr = new XMLHttpRequest();
+
+            xhr.onreadystatechange = function() {
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    // console.log(this.responseText);
+                    records = JSON.parse(this.responseText);
+                    participants_display(records);
+                }
+            }
+
+            // meeting_id = url_query()['meeting_id'];
+            meeting_id = "";
+            // console.log(meeting_id)
+            xhr.open("GET", "/api/meeting?meeting_id=" + meeting_id);
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.send(null);
+
+        }
+
+
         function id_update(id, record) {
             document.getElementById(id).innerHTML = record[id];
         }
 
 
         meeting_update();
+        participants_update();
     </script>
 
 </body>

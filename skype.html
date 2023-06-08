@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+</head>
+
+<body>
+
+    <style>
+        #content {
+            font-family: "Open Sans",sans-serif;
+        }
+    </style>
+
+    <div id="content">
+
+        <h1>Skype Chats</h1>
+d
+        <table id="chat_channels">
+            <thead>
+                <tr>
+                    <td>ID</td>
+                    <td>Name</td>
+                    <td>@</td>
+                </tr>
+            </thead>
+            <tbody id="chat_channels_table_body">
+
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+
+        function chat_channel_list_update(chat_type="") {
+            let xhr = new XMLHttpRequest();
+
+            xhr.onreadystatechange = function() {
+                if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+                    chat_channels = JSON.parse(this.responseText);
+                    chat_channel_list_display(chat_channels);
+                }
+            }
+
+            xhr.open("GET", "/api/skype/chat_channels?type=" + chat_type);
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.send(null);
+
+        }
+
+        function chat_channel_list_display(chat_channels) {
+            console.log(chat_channels);
+            records = chat_channels
+            table = document.getElementById('chat_channels_table_body');
+            table.innerHTML = "";
+
+            let obj = records.find((channel, i) => {
+
+                var chat_channel_list_tr = document.createElement('tr');
+                chat_channel_list_tr.id = 'tr_' + i;
+
+                var name_td = document.createElement('td');
+                name_td.id = 'name_' + i;
+                name_td.innerHTML = channel['name'];
+
+                chat_channel_list_tr.appendChild(name_td);
+
+                var id_td = document.createElement('td');
+                id_td.id = 'id_' + i;
+                id_td.innerHTML = channel['id'];
+                chat_channel_list_tr.appendChild(id_td);
+
+                table.appendChild(chat_channel_list_tr);
+
+            });
+
+        };
+        chat_channel_list_update();
+    </script>
+</body>
+
+</html>

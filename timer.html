@@ -80,6 +80,8 @@
     <label>Enable Zoom Chat (requires app running)</label>
     <input id="zoom_enabled" type="checkbox"/>
 
+    <label>Skype Channel ID</label>
+    <input id="skype_channel_id" size="60" type="text"/>
     <br/>
     <br/>
 
@@ -141,6 +143,28 @@
         }
 
 
+        function skype_message_send(msg) {
+
+            var skype_channel_id = document.getElementById('skype_channel_id').value;
+
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/skype/chat");
+
+            xhr.setRequestHeader("Accept", "application/json");
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onload = () => console.log(xhr.responseText);
+
+            let data = {
+                "channel_id": skype_channel_id,
+                "message": "timer: " + msg,
+            };
+
+            xhr.send(JSON.stringify(data));
+
+        }
+
+
         function remaining_countdown(start_input_id) {
             const prefix = start_input_id.split('_start_button')[0];
             var remaining_input_id = prefix + "_remaining_input";
@@ -175,6 +199,9 @@
                             message_display(msg);
                             if (zoom_enabled.checked) {
                                 message_send(msg);
+                            }
+                            if (skype_channel_id !== '') {
+                                skype_message_send(msg)
                             }
                         }
                     }
